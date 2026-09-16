@@ -17,6 +17,8 @@ import { useFinanceStore } from '@/stores/financeStore';
 import { CurrencyText } from '@/components/CurrencyText';
 import { SakuraCard } from '@/components/SakuraCard';
 
+const MAX_AMOUNT = 999_999_999; // Rp 999.999.999
+
 export default function HomeScreen() {
   const router = useRouter();
 
@@ -30,6 +32,7 @@ export default function HomeScreen() {
   const deleteTransaction = useFinanceStore((state) => state.deleteTransaction);
 
   const [lastLoggedNote, setLastLoggedNote] = useState<string | null>(null);
+  const [isQuickLogging, setIsQuickLogging] = useState(false);
 
   // Modal Tambah Saldo / Gajian
   const [showDepositModal, setShowDepositModal] = useState(false);
@@ -60,12 +63,18 @@ export default function HomeScreen() {
   );
 
   const handleQuickLog = (item: (typeof quickLogs)[0]) => {
+    if (isQuickLogging) return;
+    setIsQuickLogging(true);
+
     const poc = pockets.find((p) => p.id === item.pocketId);
     if (poc && poc.balance < item.amount) {
       Alert.alert(
         'Saldo Tidak Cukup',
         `Saldo di ${poc.name} (Rp ${poc.balance.toLocaleString('id-ID')}) tidak cukup untuk ${item.title}.`
       );
+      setTimeout(() => {
+        setIsQuickLogging(false);
+      }, 500);
       return;
     }
 
@@ -74,12 +83,22 @@ export default function HomeScreen() {
       setLastLoggedNote(`Tercatat: ${item.title} (-Rp ${item.amount.toLocaleString('id-ID')})`);
       setTimeout(() => setLastLoggedNote(null), 3000);
     }
+    setTimeout(() => {
+      setIsQuickLogging(false);
+    }, 500);
   };
 
   const handleSaveDeposit = () => {
     const nominal = parseInt(depositAmountStr, 10) || 0;
     if (nominal <= 0) {
       Alert.alert('Perhatian', 'Harap masukkan nominal penambahan saldo.');
+      return;
+    }
+    if (nominal > MAX_AMOUNT) {
+      Alert.alert(
+        'Nominal Terlalu Besar',
+        'Maksimal nominal penambahan saldo adalah Rp 999.999.999'
+      );
       return;
     }
 
@@ -99,7 +118,8 @@ export default function HomeScreen() {
 
   const handleQuickAddDeposit = (add: number) => {
     const current = parseInt(depositAmountStr, 10) || 0;
-    setDepositAmountStr((current + add).toString());
+    const nextVal = Math.min(current + add, MAX_AMOUNT);
+    setDepositAmountStr(nextVal.toString());
   };
 
   const getCategory = (catId: string) => categories.find((c) => c.id === catId);
@@ -211,8 +231,9 @@ export default function HomeScreen() {
           {quickLogs.map((item) => (
             <TouchableOpacity
               key={item.id}
-              style={styles.quickCard}
+              style={[styles.quickCard, isQuickLogging && styles.quickCardDisabled]}
               activeOpacity={0.7}
+              disabled={isQuickLogging}
               onPress={() => handleQuickLog(item)}
             >
               <View style={styles.quickIconWrap}>
@@ -224,8 +245,10 @@ export default function HomeScreen() {
               <Text style={styles.quickAmount}>
                 -Rp {item.amount.toLocaleString('id-ID')}
               </Text>
-              <View style={styles.tapBadge}>
-                <Text style={styles.tapBadgeText}>Tap Catat</Text>
+              <View style={[styles.tapBadge, isQuickLogging && styles.tapBadgeDisabled]}>
+                <Text style={styles.tapBadgeText}>
+                  {isQuickLogging ? 'Memproses...' : 'Tap Catat'}
+                </Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -706,6 +729,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     color: SakuraTheme.colors.primary,
+  },
+  quickCardDisabled: {
+    opacity: 0.5,
+  },
+  tapBadgeDisabled: {
+    backgroundColor: SakuraTheme.colors.cardSubtle,
   },
   pocketListRow: {
     flexDirection: 'row',

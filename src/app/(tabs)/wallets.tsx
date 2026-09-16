@@ -16,6 +16,8 @@ import { useFinanceStore } from '@/stores/financeStore';
 import { CurrencyText } from '@/components/CurrencyText';
 import { SakuraCard } from '@/components/SakuraCard';
 
+const MAX_AMOUNT = 999_999_999; // Rp 999.999.999
+
 export default function WalletsScreen() {
   const pockets = useFinanceStore((state) => state.pockets);
   const updatePocketBalance = useFinanceStore((state) => state.updatePocketBalance);
@@ -54,6 +56,13 @@ export default function WalletsScreen() {
       Alert.alert('Perhatian', 'Harap masukkan nominal penambahan saldo.');
       return;
     }
+    if (nominal > MAX_AMOUNT) {
+      Alert.alert(
+        'Nominal Terlalu Besar',
+        'Maksimal nominal penambahan saldo adalah Rp 999.999.999'
+      );
+      return;
+    }
 
     depositToPocket(depositPocketId, nominal, depositNote.trim() || 'Gaji Bulanan');
     const poc = pockets.find((p) => p.id === depositPocketId);
@@ -72,6 +81,13 @@ export default function WalletsScreen() {
   const handleSaveEdit = () => {
     if (!editPocketId) return;
     const newBal = parseInt(editBalanceStr, 10) || 0;
+    if (newBal > MAX_AMOUNT) {
+      Alert.alert(
+        'Nominal Terlalu Besar',
+        'Maksimal saldo kantong adalah Rp 999.999.999'
+      );
+      return;
+    }
     updatePocketBalance(editPocketId, newBal);
     setEditPocketId(null);
     Alert.alert('Sukses', 'Saldo kantong berhasil diperbarui!');
@@ -83,6 +99,13 @@ export default function WalletsScreen() {
       return;
     }
     const initialBal = parseInt(newPocketBalStr, 10) || 0;
+    if (initialBal > MAX_AMOUNT) {
+      Alert.alert(
+        'Nominal Terlalu Besar',
+        'Maksimal saldo awal adalah Rp 999.999.999'
+      );
+      return;
+    }
     addPocket(newPocketName.trim(), initialBal);
     setShowAddModal(false);
     setNewPocketName('');

@@ -16,6 +16,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { SakuraTheme } from '@/constants/theme';
 import { useFinanceStore } from '@/stores/financeStore';
 
+const MAX_AMOUNT = 999_999_999; // Rp 999.999.999
+
 export default function AddTransactionTab() {
   const router = useRouter();
   const pockets = useFinanceStore((state) => state.pockets);
@@ -32,7 +34,8 @@ export default function AddTransactionTab() {
 
   const handleAddQuick = (val: number) => {
     const current = parseInt(amountStr, 10) || 0;
-    setAmountStr((current + val).toString());
+    const nextVal = Math.min(current + val, MAX_AMOUNT);
+    setAmountStr(nextVal.toString());
   };
 
   const handleClear = () => {
@@ -43,6 +46,13 @@ export default function AddTransactionTab() {
     const nominal = parseInt(amountStr, 10) || 0;
     if (nominal <= 0) {
       Alert.alert('Perhatian', 'Silakan masukkan nominal transaksi.');
+      return;
+    }
+    if (nominal > MAX_AMOUNT) {
+      Alert.alert(
+        'Nominal Terlalu Besar',
+        'Maksimal nominal transaksi adalah Rp 999.999.999'
+      );
       return;
     }
 
