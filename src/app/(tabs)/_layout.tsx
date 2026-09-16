@@ -1,12 +1,10 @@
 import React from 'react';
-import { Tabs, useRouter } from 'expo-router';
-import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { Tabs } from 'expo-router';
+import { View, StyleSheet, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SakuraTheme } from '@/constants/theme';
 
 export default function TabsLayout() {
-  const router = useRouter();
-
   return (
     <Tabs
       screenOptions={{
@@ -22,52 +20,22 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Beranda',
-          tabBarIcon: ({ color, focused }) => (
-            <MaterialIcons
-              name={focused ? 'home' : 'home'}
-              size={24}
-              color={color}
-            />
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="home" size={24} color={color} />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="analytics"
+        name="add"
         options={{
-          title: 'Analisis',
-          tabBarIcon: ({ color, focused }) => (
-            <MaterialIcons
-              name={focused ? 'bar-chart' : 'insert-chart-outlined'}
-              size={24}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="add-placeholder"
-        options={{
-          title: '',
-          tabBarButton: () => (
-            <View style={styles.fabContainer}>
-              <TouchableOpacity
-                style={styles.fabButton}
-                activeOpacity={0.85}
-                onPress={() => router.push('/add-transaction')}
-                accessibilityLabel="Catat Transaksi Cepat"
-              >
-                <MaterialIcons name="add" size={30} color="#ffffff" />
-              </TouchableOpacity>
+          title: 'Catat',
+          tabBarIcon: () => (
+            <View style={styles.fabIcon}>
+              <MaterialIcons name="add" size={26} color="#ffffff" />
             </View>
           ),
-        }}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            router.push('/add-transaction');
-          },
+          tabBarLabelStyle: [styles.tabBarLabel, styles.addLabel],
         }}
       />
 
@@ -75,26 +43,18 @@ export default function TabsLayout() {
         name="wallets"
         options={{
           title: 'Kantong',
-          tabBarIcon: ({ color, focused }) => (
-            <MaterialIcons
-              name={focused ? 'account-balance-wallet' : 'account-balance-wallet'}
-              size={24}
-              color={color}
-            />
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="account-balance-wallet" size={24} color={color} />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="profile"
+        name="analytics"
         options={{
-          title: 'Profil',
-          tabBarIcon: ({ color, focused }) => (
-            <MaterialIcons
-              name={focused ? 'person' : 'person-outline'}
-              size={24}
-              color={color}
-            />
+          title: 'Laporan',
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="insert-chart" size={24} color={color} />
           ),
         }}
       />
@@ -107,41 +67,36 @@ const styles = StyleSheet.create({
     backgroundColor: SakuraTheme.colors.card,
     borderTopWidth: 1,
     borderTopColor: SakuraTheme.colors.border,
-    height: Platform.OS === 'ios' ? 86 : 68,
-    paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+    height: Platform.OS === 'ios' ? 84 : 66,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 8,
     paddingTop: 8,
     elevation: 8,
     shadowColor: SakuraTheme.colors.shadowColor,
-    shadowOffset: { width: 0, height: -4 },
+    shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.06,
-    shadowRadius: 10,
+    shadowRadius: 8,
   },
   tabBarLabel: {
     fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     marginTop: 2,
   },
-  fabContainer: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 60,
+  addLabel: {
+    fontWeight: '700',
+    color: SakuraTheme.colors.primary,
   },
-  fabButton: {
-    top: -16,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+  fabIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: SakuraTheme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: SakuraTheme.colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 8,
-    borderWidth: 3,
-    borderColor: SakuraTheme.colors.card,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
 });

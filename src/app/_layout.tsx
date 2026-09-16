@@ -9,7 +9,6 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
   useEffect(() => {
-    // Hide splash screen once mounted
     SplashScreen.hideAsync().catch(() => {});
   }, []);
 
@@ -23,14 +22,6 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="add-transaction"
-          options={{
-            presentation: 'modal',
-            headerShown: false,
-            animation: 'slide_from_bottom',
-          }}
-        />
       </Stack>
     </SafeAreaProvider>
   );

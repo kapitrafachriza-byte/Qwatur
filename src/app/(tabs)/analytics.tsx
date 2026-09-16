@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,244 +11,189 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SakuraTheme } from '@/constants/theme';
 import { useFinanceStore } from '@/stores/financeStore';
-import { HeaderBar } from '@/components/HeaderBar';
 import { CurrencyText } from '@/components/CurrencyText';
 import { SakuraCard } from '@/components/SakuraCard';
-import { BudgetProgressBar } from '@/components/BudgetProgressBar';
-
-type PeriodType = 'week' | 'month' | 'year';
 
 export default function AnalyticsScreen() {
-  const [period, setPeriod] = useState<PeriodType>('month');
-  const { categories, transactions, getTotalExpenseThisMonth, getTotalIncomeThisMonth } =
-    useFinanceStore();
+  const transactions = useFinanceStore((state) => state.transactions);
+  const categories = useFinanceStore((state) => state.categories);
+  const pockets = useFinanceStore((state) => state.pockets);
+  const deleteTransaction = useFinanceStore((state) => state.deleteTransaction);
 
-  const totalExpense = getTotalExpenseThisMonth();
-  const totalIncome = getTotalIncomeThisMonth();
-  const savingsRate =
-    totalIncome > 0 ? Math.max(0, Math.round(((totalIncome - totalExpense) / totalIncome) * 100)) : 0;
+  const totalExpense = useMemo(
+    () =>
+      transactions
+        .filter((t) => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0),
+    [transactions]
+  );
 
-  const handleExport = (format: 'PDF' | 'CSV') => {
-    Alert.alert(
-      `Ekspor Laporan ${format} Berhasil 🌸`,
-      `Rekapitulasi keuangan periode ${
-        period === 'week' ? 'Pekan Ini' : period === 'month' ? 'Bulan Ini' : 'Tahun Ini'
-      } telah siap diunduh.`,
-      [{ text: 'Buka File' }, { text: 'Tutup', style: 'cancel' }]
-    );
-  };
+  const totalIncome = useMemo(
+    () =>
+      transactions
+        .filter((t) => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0),
+    [transactions]
+  );
 
-  const trendBars = [
-    { label: 'Tgl 1-5', amount: 850000, ratio: 0.4 },
-    { label: 'Tgl 6-10', amount: 1450000, ratio: 0.68 },
-    { label: 'Tgl 11-15', amount: 2100000, ratio: 1.0, isPeak: true },
-    { label: 'Tgl 16-20', amount: 950000, ratio: 0.45 },
-    { label: 'Tgl 21-25', amount: 1200000, ratio: 0.55 },
-  ];
+  // Group expenses by category
+  const categoryBreakdown = useMemo(() => {
+    const map = new Map<string, number>();
+    transactions
+      .filter((t) => t.type === 'expense')
+      .forEach((t) => {
+        const current = map.get(t.categoryId) || 0;
+        map.set(t.categoryId, current + t.amount);
+      });
+
+    return categories
+      .filter((c) => c.type === 'expense')
+      .map((c) => {
+        const spent = map.get(c.id) || 0;
+        const percent = totalExpense > 0 ? Math.round((spent / totalExpense) * 100) : 0;
+        return {
+          ...c,
+          spent,
+          percent,
+        };
+      })
+      .filter((c) => c.spent > 0)
+      .sort((a, b) => b.spent - a.spent);
+  }, [transactions, categories, totalExpense]);
+
+  const getPocket = (pocId: string) => pockets.find((p) => p.id === pocId);
+  const getCategory = (catId: string) => categories.find((c) => c.id === catId);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <HeaderBar title="Analisis & Laporan 🌸" subtitle="Pola pengeluaran & kesehatan finansial" />
+      <View style={styles.topHeader}>
+        <Text style={styles.headerTitle}>Laporan Keuangan 🌸</Text>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Period Selector Tabs */}
-        <View style={styles.periodTabs}>
-          <TouchableOpacity
-            style={[styles.periodTab, period === 'week' && styles.periodTabActive]}
-            onPress={() => setPeriod('week')}
-          >
-            <Text style={[styles.periodTabText, period === 'week' && styles.periodTabTextActive]}>
-              Pekan Ini
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.periodTab, period === 'month' && styles.periodTabActive]}
-            onPress={() => setPeriod('month')}
-          >
-            <Text style={[styles.periodTabText, period === 'month' && styles.periodTabTextActive]}>
-              Bulan Ini
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.periodTab, period === 'year' && styles.periodTabActive]}
-            onPress={() => setPeriod('year')}
-          >
-            <Text style={[styles.periodTabText, period === 'year' && styles.periodTabTextActive]}>
-              Tahun Ini
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Financial Health Summary Card */}
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryHeader}>
-            <Text style={styles.summaryLabel}>Rasio Tabungan Bulan Berjalan</Text>
-            <View style={styles.rateBadge}>
-              <Text style={styles.rateText}>{savingsRate}% Tersimpan</Text>
-            </View>
+        {/* Ringkasan Pemasukan & Pengeluaran */}
+        <View style={styles.summaryGrid}>
+          <View style={[styles.summaryCard, { backgroundColor: '#ecfdf5', borderColor: '#a7f3d0' }]}>
+            <Text style={[styles.summaryLabel, { color: '#047857' }]}>Total Pemasukan</Text>
+            <CurrencyText amount={totalIncome} type="income" style={styles.summaryVal} />
           </View>
 
-          <View style={styles.statGrid}>
-            <View style={styles.statCol}>
-              <Text style={styles.statSub}>Total Pengeluaran</Text>
-              <CurrencyText amount={totalExpense} style={styles.statVal} />
-            </View>
-            <View style={styles.statCol}>
-              <Text style={styles.statSub}>Total Pemasukan</Text>
-              <CurrencyText amount={totalIncome} style={styles.statVal} />
-            </View>
+          <View style={[styles.summaryCard, { backgroundColor: '#fff1f2', borderColor: '#fecdd3' }]}>
+            <Text style={[styles.summaryLabel, { color: '#be185d' }]}>Total Pengeluaran</Text>
+            <CurrencyText amount={totalExpense} type="expense" style={styles.summaryVal} />
           </View>
         </View>
 
-        {/* Peak Alert Banner */}
-        <SakuraCard variant="subtle" style={styles.peakAlertCard}>
-          <View style={styles.peakAlertRow}>
-            <View style={styles.alertIconWrap}>
-              <MaterialIcons name="warning-amber" size={22} color={SakuraTheme.colors.warning} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.alertTitle}>Puncak Pengeluaran Terdeteksi!</Text>
-              <Text style={styles.alertBody}>
-                Pengeluaran tertinggi berada di rentang <Text style={{ fontWeight: '700' }}>Tgl 11-15</Text> (Rp 2.100.000), terutama pada pos Makanan & Tagihan.
-              </Text>
-            </View>
-          </View>
-        </SakuraCard>
+        {/* Pengeluaran per Kategori */}
+        <Text style={styles.sectionTitle}>Pengeluaran per Kategori</Text>
 
-        {/* Bagan Tren Pengeluaran */}
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleRow}>
-            <MaterialIcons name="insights" size={20} color={SakuraTheme.colors.primary} />
-            <Text style={styles.sectionTitle}>Bagan Tren Pengeluaran</Text>
-          </View>
-          <Text style={styles.metricBadge}>Dalam Periode</Text>
-        </View>
-
-        <SakuraCard style={styles.chartCard}>
-          <View style={styles.barsContainer}>
-            {trendBars.map((b, idx) => (
-              <View key={idx} style={styles.barItem}>
-                <View style={styles.barTrack}>
+        {categoryBreakdown.length === 0 ? (
+          <SakuraCard style={styles.emptyCard}>
+            <Text style={styles.emptyText}>Belum ada pengeluaran yang dicatat.</Text>
+          </SakuraCard>
+        ) : (
+          <View style={styles.catList}>
+            {categoryBreakdown.map((item) => (
+              <SakuraCard key={item.id} style={styles.catCard}>
+                <View style={styles.catRow}>
+                  <View style={[styles.catIcon, { backgroundColor: item.color + '18' }]}>
+                    <MaterialIcons name={item.icon as any} size={20} color={item.color} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.catTitleRow}>
+                      <Text style={styles.catName}>{item.name}</Text>
+                      <Text style={styles.catPercent}>{item.percent}%</Text>
+                    </View>
+                    <CurrencyText amount={item.spent} type="expense" style={styles.catSpent} />
+                  </View>
+                </View>
+                <View style={styles.progressTrack}>
                   <View
                     style={[
-                      styles.barFill,
-                      {
-                        height: `${b.ratio * 100}%`,
-                        backgroundColor: b.isPeak
-                          ? SakuraTheme.colors.primary
-                          : SakuraTheme.colors.primaryLight,
-                      },
+                      styles.progressFill,
+                      { width: `${item.percent}%`, backgroundColor: item.color },
                     ]}
                   />
                 </View>
-                <Text
-                  style={[
-                    styles.barLabel,
-                    b.isPeak && { color: SakuraTheme.colors.primary, fontWeight: '700' },
-                  ]}
-                >
-                  {b.label}
-                </Text>
-              </View>
+              </SakuraCard>
             ))}
           </View>
-        </SakuraCard>
+        )}
 
-        {/* Alokasi & Manajemen Batas Anggaran */}
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleRow}>
-            <MaterialIcons name="pie-chart" size={20} color={SakuraTheme.colors.primary} />
-            <Text style={styles.sectionTitle}>Batas & Alokasi Anggaran</Text>
-          </View>
-          <Text style={styles.metricBadge}>Warning Limit 80%</Text>
-        </View>
+        {/* Semua Riwayat Transaksi */}
+        <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+          Semua Catatan ({transactions.length})
+        </Text>
 
-        <View style={styles.categoryAllocationList}>
-          {categories
-            .filter((c) => c.type === 'expense')
-            .map((cat) => {
-              const ratio = cat.budgetLimit > 0 ? cat.currentSpent / cat.budgetLimit : 0;
-              const isOver = ratio >= 0.85;
+        <View style={styles.txList}>
+          {transactions.map((tx) => {
+            const cat = getCategory(tx.categoryId);
+            const poc = getPocket(tx.pocketId);
+            const isExpense = tx.type === 'expense';
 
-              return (
-                <SakuraCard key={cat.id} style={styles.catAllocCard}>
-                  <View style={styles.catAllocTop}>
-                    <View style={[styles.catIconWrap, { backgroundColor: cat.color + '18' }]}>
-                      <MaterialIcons name={cat.icon as any} size={20} color={cat.color} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.catName}>{cat.name}</Text>
-                      <View style={styles.catSpendRow}>
-                        <CurrencyText amount={cat.currentSpent} style={styles.catSpentText} />
-                        <Text style={styles.catLimitText}>
-                          {' dari '}Rp {cat.budgetLimit.toLocaleString('id-ID')}
-                        </Text>
-                      </View>
-                    </View>
-                    {isOver && (
-                      <View style={styles.warningPill}>
-                        <Text style={styles.warningPillText}>Waspada!</Text>
-                      </View>
-                    )}
+            return (
+              <SakuraCard key={tx.id} style={styles.txCard}>
+                <View style={styles.txRow}>
+                  <View
+                    style={[
+                      styles.txIcon,
+                      {
+                        backgroundColor: isExpense
+                          ? SakuraTheme.colors.expenseBg
+                          : SakuraTheme.colors.incomeBg,
+                      },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name={(cat?.icon as any) || (isExpense ? 'arrow-upward' : 'arrow-downward')}
+                      size={18}
+                      color={isExpense ? SakuraTheme.colors.expense : SakuraTheme.colors.income}
+                    />
                   </View>
-
-                  <View style={{ marginTop: 10 }}>
-                    <BudgetProgressBar spent={cat.currentSpent} limit={cat.budgetLimit} showLabels height={8} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.txNote}>{tx.note}</Text>
+                    <Text style={styles.txSub}>
+                      {poc?.name || 'Kas'} •{' '}
+                      {new Date(tx.date).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
                   </View>
-                </SakuraCard>
-              );
-            })}
+                  <View style={styles.txRightCol}>
+                    <CurrencyText
+                      amount={tx.amount}
+                      type={isExpense ? 'expense' : 'income'}
+                      showSign
+                      style={styles.txVal}
+                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        Alert.alert(
+                          'Hapus Transaksi',
+                          `Hapus ${tx.note}? Saldo kantong akan otomatis dikembalikan.`,
+                          [
+                            { text: 'Batal', style: 'cancel' },
+                            {
+                              text: 'Hapus',
+                              style: 'destructive',
+                              onPress: () => deleteTransaction(tx.id),
+                            },
+                          ]
+                        );
+                      }}
+                      style={styles.delBtn}
+                    >
+                      <MaterialIcons name="delete-outline" size={16} color="#ba1a1a" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </SakuraCard>
+            );
+          })}
         </View>
-
-        {/* Saran Cerdas qwatur (AI Financial Advisor) */}
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleRow}>
-            <MaterialIcons name="auto-awesome" size={20} color={SakuraTheme.colors.primary} />
-            <Text style={styles.sectionTitle}>Saran Cerdas qwatur (AI Advisor)</Text>
-          </View>
-        </View>
-
-        <SakuraCard style={styles.advisorCard}>
-          <View style={styles.advisorHeader}>
-            <MaterialIcons name="psychology" size={24} color={SakuraTheme.colors.primary} />
-            <Text style={styles.advisorTitle}>Evaluasi Kebiasaan Kopi & Nongkrong</Text>
-          </View>
-          <Text style={styles.advisorBody}>
-            Bulan ini kamu sudah 12 kali membeli kopi susu kekinian dengan total{' '}
-            <Text style={{ fontWeight: '700' }}>Rp 420.000</Text>. Jika dikurangi menjadi 2 kali per pekan, kamu bisa mengalihkan{' '}
-            <Text style={{ fontWeight: '700', color: SakuraTheme.colors.income }}>Rp 200.000/bulan</Text> ke tabungan impian Liburan Jepang!
-          </Text>
-          <TouchableOpacity
-            style={styles.mitigateBtn}
-            onPress={() =>
-              Alert.alert('Target Hemat Diaktifkan! 🌸', 'Target penghematan kopi Rp 200.000/bulan telah dipasang di pos Tabungan Jepang.')
-            }
-          >
-            <MaterialIcons name="check" size={16} color="#ffffff" />
-            <Text style={styles.mitigateBtnText}>Pasang Target Hemat Rp 200.000</Text>
-          </TouchableOpacity>
-        </SakuraCard>
-
-        {/* Ekspor Laporan Keuangan */}
-        <SakuraCard style={styles.exportCard}>
-          <View style={styles.exportRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.exportTitle}>Unduh Rekap Laporan Keuangan</Text>
-              <Text style={styles.exportSubtitle}>Format standar audit untuk pencatatan mandiri</Text>
-            </View>
-          </View>
-          <View style={styles.exportBtnGroup}>
-            <TouchableOpacity style={styles.exportBtn} onPress={() => handleExport('PDF')}>
-              <MaterialIcons name="picture-as-pdf" size={18} color={SakuraTheme.colors.primary} />
-              <Text style={styles.exportBtnText}>Unduh PDF</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.exportBtn} onPress={() => handleExport('CSV')}>
-              <MaterialIcons name="table-view" size={18} color={SakuraTheme.colors.primary} />
-              <Text style={styles.exportBtnText}>Unduh CSV</Text>
-            </TouchableOpacity>
-          </View>
-        </SakuraCard>
 
         <View style={{ height: 30 }} />
       </ScrollView>
@@ -261,195 +206,72 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: SakuraTheme.colors.canvas,
   },
-  scrollContent: {
-    paddingHorizontal: SakuraTheme.spacing.md,
-    paddingBottom: 40,
+  topHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: SakuraTheme.colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: SakuraTheme.colors.border,
   },
-  periodTabs: {
-    flexDirection: 'row',
-    backgroundColor: SakuraTheme.colors.cardSubtle,
-    borderRadius: SakuraTheme.borderRadius.lg,
-    padding: 4,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: SakuraTheme.colors.border,
-  },
-  periodTab: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: SakuraTheme.borderRadius.md,
-  },
-  periodTabActive: {
-    backgroundColor: SakuraTheme.colors.primary,
-  },
-  periodTabText: {
+  headerTitle: {
     fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 12,
-    fontWeight: '600',
-    color: SakuraTheme.colors.textSecondary,
+    fontSize: 18,
+    fontWeight: '800',
+    color: SakuraTheme.colors.textPrimary,
   },
-  periodTabTextActive: {
-    color: '#ffffff',
-    fontWeight: '700',
+  scrollContent: {
+    padding: 16,
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 20,
   },
   summaryCard: {
-    backgroundColor: SakuraTheme.colors.primaryDark,
-    borderRadius: SakuraTheme.borderRadius.xl,
-    padding: 16,
-    marginBottom: 14,
-  },
-  summaryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    flex: 1,
+    padding: 14,
+    borderRadius: SakuraTheme.borderRadius.lg,
+    borderWidth: 1,
   },
   summaryLabel: {
     fontFamily: SakuraTheme.typography.fontFamily,
     fontSize: 12,
-    color: '#ffd5dd',
+    fontWeight: '600',
+    marginBottom: 4,
   },
-  rateBadge: {
-    backgroundColor: '#ecfdf5',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: SakuraTheme.borderRadius.full,
-  },
-  rateText: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#047857',
-  },
-  statGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statCol: {
-    flex: 1,
-  },
-  statSub: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 11,
-    color: '#ffd5dd',
-    marginBottom: 2,
-  },
-  statVal: {
+  summaryVal: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  peakAlertCard: {
-    padding: 12,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: SakuraTheme.colors.warning,
-  },
-  peakAlertRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  alertIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: SakuraTheme.colors.warningBg,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  alertTitle: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 13,
-    fontWeight: '700',
-    color: SakuraTheme.colors.textPrimary,
-  },
-  alertBody: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 11,
-    color: SakuraTheme.colors.textSecondary,
-    marginTop: 2,
-    lineHeight: 16,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-    marginTop: 6,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    fontWeight: '800',
   },
   sectionTitle: {
     fontFamily: SakuraTheme.typography.fontFamily,
     fontSize: 15,
     fontWeight: '700',
     color: SakuraTheme.colors.textPrimary,
+    marginBottom: 10,
   },
-  metricBadge: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 11,
-    color: SakuraTheme.colors.textMuted,
-    backgroundColor: SakuraTheme.colors.cardHighlight,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+  catList: {
+    gap: 10,
   },
-  chartCard: {
-    paddingVertical: 16,
-    marginBottom: 20,
+  catCard: {
+    padding: 12,
   },
-  barsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: 120,
-    paddingHorizontal: 10,
-  },
-  barItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  barTrack: {
-    width: 18,
-    height: 90,
-    backgroundColor: SakuraTheme.colors.cardHighlight,
-    borderRadius: 9,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-  },
-  barFill: {
-    width: '100%',
-    borderRadius: 9,
-  },
-  barLabel: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 10,
-    color: SakuraTheme.colors.textSecondary,
-    marginTop: 8,
-  },
-  categoryAllocationList: {
-    gap: 12,
-    marginBottom: 20,
-  },
-  catAllocCard: {
-    padding: 14,
-  },
-  catAllocTop: {
+  catRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+    marginBottom: 8,
   },
-  catIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+  catIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  catTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   catName: {
     fontFamily: SakuraTheme.typography.fontFamily,
@@ -457,112 +279,76 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: SakuraTheme.colors.textPrimary,
   },
-  catSpendRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  catPercent: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 12,
+    fontWeight: '700',
+    color: SakuraTheme.colors.textSecondary,
+  },
+  catSpent: {
+    fontSize: 13,
+    fontWeight: '700',
     marginTop: 2,
   },
-  catSpentText: {
-    fontSize: 12,
-    fontWeight: '700',
+  progressTrack: {
+    width: '100%',
+    height: 6,
+    backgroundColor: SakuraTheme.colors.cardHighlight,
+    borderRadius: 3,
+    overflow: 'hidden',
   },
-  catLimitText: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 11,
-    color: SakuraTheme.colors.textMuted,
+  progressFill: {
+    height: '100%',
+    borderRadius: 3,
   },
-  warningPill: {
-    backgroundColor: SakuraTheme.colors.expenseBg,
-    borderWidth: 1,
-    borderColor: SakuraTheme.colors.expenseBorder,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  warningPillText: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 10,
-    fontWeight: '700',
-    color: SakuraTheme.colors.expense,
-  },
-  advisorCard: {
-    padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: SakuraTheme.colors.primary,
-    marginBottom: 20,
-  },
-  advisorHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  txList: {
     gap: 8,
-    marginBottom: 8,
   },
-  advisorTitle: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 14,
-    fontWeight: '700',
-    color: SakuraTheme.colors.textPrimary,
+  txCard: {
+    padding: 12,
   },
-  advisorBody: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 12,
-    lineHeight: 18,
-    color: SakuraTheme.colors.textSecondary,
-    marginBottom: 12,
-  },
-  mitigateBtn: {
+  txRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
+  },
+  txIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
-    gap: 6,
-    backgroundColor: SakuraTheme.colors.primary,
-    paddingVertical: 10,
-    borderRadius: SakuraTheme.borderRadius.md,
+    alignItems: 'center',
   },
-  mitigateBtnText: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  exportCard: {
-    padding: 16,
-  },
-  exportRow: {
-    marginBottom: 12,
-  },
-  exportTitle: {
+  txNote: {
     fontFamily: SakuraTheme.typography.fontFamily,
     fontSize: 13,
     fontWeight: '700',
     color: SakuraTheme.colors.textPrimary,
   },
-  exportSubtitle: {
+  txSub: {
     fontFamily: SakuraTheme.typography.fontFamily,
     fontSize: 11,
     color: SakuraTheme.colors.textMuted,
     marginTop: 2,
   },
-  exportBtnGroup: {
-    flexDirection: 'row',
-    gap: 10,
+  txRightCol: {
+    alignItems: 'flex-end',
+    gap: 4,
   },
-  exportBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: SakuraTheme.colors.cardSubtle,
-    borderWidth: 1,
-    borderColor: SakuraTheme.colors.border,
-    paddingVertical: 10,
-    borderRadius: SakuraTheme.borderRadius.md,
-  },
-  exportBtnText: {
-    fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 12,
+  txVal: {
+    fontSize: 13,
     fontWeight: '700',
-    color: SakuraTheme.colors.primary,
+  },
+  delBtn: {
+    padding: 2,
+  },
+  emptyCard: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 13,
+    color: SakuraTheme.colors.textMuted,
   },
 });
