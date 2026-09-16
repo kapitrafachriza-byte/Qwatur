@@ -51,6 +51,12 @@ interface FinanceState {
   }) => void;
   deleteTransaction: (id: string) => void;
   executeQuickLog: (quickLogId: string) => Transaction | null;
+  depositToPocket: (
+    pocketId: string,
+    amount: number,
+    note?: string,
+    categoryId?: string
+  ) => void;
   updatePocketBalance: (pocketId: string, newBalance: number) => void;
   addPocket: (name: string, initialBalance: number, icon?: string) => void;
 }
@@ -126,7 +132,6 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     };
 
     set((state) => {
-      // Langsung potong atau tambah saldo kantong
       const nextPockets = state.pockets.map((pocket) => {
         if (pocket.id === tx.pocketId) {
           const newBal =
@@ -150,7 +155,6 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       const tx = state.transactions.find((t) => t.id === id);
       if (!tx) return state;
 
-      // Kembalikan saldo kantong saat transaksi dihapus
       const nextPockets = state.pockets.map((pocket) => {
         if (pocket.id === tx.pocketId) {
           const revertedBal =
@@ -184,7 +188,6 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     };
 
     set((state) => {
-      // Potong saldo kantong langsung!
       const nextPockets = state.pockets.map((pocket) => {
         if (pocket.id === item.pocketId) {
           return {
@@ -202,6 +205,31 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     });
 
     return newTx;
+  },
+
+  depositToPocket: (pocketId, amount, note, categoryId) => {
+    const finalNote = note || 'Gaji Bulanan / Tambah Saldo';
+    const finalCatId = categoryId || 'cat-6';
+
+    const newTx: Transaction = {
+      id: `tx-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      amount,
+      type: 'income',
+      categoryId: finalCatId,
+      pocketId,
+      note: finalNote,
+      date: new Date().toISOString(),
+    };
+
+    set((state) => {
+      const nextPockets = state.pockets.map((p) =>
+        p.id === pocketId ? { ...p, balance: p.balance + amount } : p
+      );
+      return {
+        transactions: [newTx, ...state.transactions],
+        pockets: nextPockets,
+      };
+    });
   },
 
   updatePocketBalance: (pocketId, newBalance) => {

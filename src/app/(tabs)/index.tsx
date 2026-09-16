@@ -5,7 +5,9 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TextInput,
   Alert,
+  Modal,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,9 +26,16 @@ export default function HomeScreen() {
   const quickLogs = useFinanceStore((state) => state.quickLogs);
   const transactions = useFinanceStore((state) => state.transactions);
   const executeQuickLog = useFinanceStore((state) => state.executeQuickLog);
+  const depositToPocket = useFinanceStore((state) => state.depositToPocket);
   const deleteTransaction = useFinanceStore((state) => state.deleteTransaction);
 
   const [lastLoggedNote, setLastLoggedNote] = useState<string | null>(null);
+
+  // Modal Tambah Saldo / Gajian
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAmountStr, setDepositAmountStr] = useState('5000000');
+  const [selectedDepositPocket, setSelectedDepositPocket] = useState(pockets[0]?.id || 'poc-1');
+  const [depositNote, setDepositNote] = useState('Gaji Bulanan');
 
   // Direct reactive calculations
   const totalBalance = useMemo(
@@ -67,6 +76,32 @@ export default function HomeScreen() {
     }
   };
 
+  const handleSaveDeposit = () => {
+    const nominal = parseInt(depositAmountStr, 10) || 0;
+    if (nominal <= 0) {
+      Alert.alert('Perhatian', 'Harap masukkan nominal penambahan saldo.');
+      return;
+    }
+
+    depositToPocket(
+      selectedDepositPocket,
+      nominal,
+      depositNote.trim() || 'Gaji Bulanan / Tambah Saldo'
+    );
+
+    const targetPoc = pockets.find((p) => p.id === selectedDepositPocket);
+    setShowDepositModal(false);
+    setLastLoggedNote(
+      `Berhasil! Saldo ${targetPoc?.name || 'Kantong'} bertambah +Rp ${nominal.toLocaleString('id-ID')}`
+    );
+    setTimeout(() => setLastLoggedNote(null), 4000);
+  };
+
+  const handleQuickAddDeposit = (add: number) => {
+    const current = parseInt(depositAmountStr, 10) || 0;
+    setDepositAmountStr((current + add).toString());
+  };
+
   const getCategory = (catId: string) => categories.find((c) => c.id === catId);
   const getPocket = (pocId: string) => pockets.find((p) => p.id === pocId);
 
@@ -80,15 +115,15 @@ export default function HomeScreen() {
         </View>
         <TouchableOpacity
           style={styles.addIconBtn}
-          onPress={() => router.push('/(tabs)/add')}
-          accessibilityLabel="Catat Transaksi"
+          onPress={() => setShowDepositModal(true)}
+          accessibilityLabel="Tambah Saldo Gajian"
         >
-          <MaterialIcons name="add" size={24} color="#ffffff" />
+          <MaterialIcons name="add-card" size={22} color="#ffffff" />
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Toast Notifikasi Catat Cepat */}
+        {/* Toast Notifikasi Banner */}
         {lastLoggedNote && (
           <View style={styles.toastBanner}>
             <MaterialIcons name="check-circle" size={18} color="#047857" />
@@ -98,7 +133,17 @@ export default function HomeScreen() {
 
         {/* 1. Kartu Saldo Utama */}
         <View style={styles.masterCard}>
-          <Text style={styles.masterLabel}>Total Saldo Tersedia</Text>
+          <View style={styles.masterTop}>
+            <Text style={styles.masterLabel}>Total Saldo Tersedia</Text>
+            <TouchableOpacity
+              style={styles.masterDepositChip}
+              onPress={() => setShowDepositModal(true)}
+            >
+              <MaterialIcons name="add" size={14} color="#ffffff" />
+              <Text style={styles.masterDepositText}>Tambah Saldo</Text>
+            </TouchableOpacity>
+          </View>
+
           <CurrencyText
             amount={totalBalance}
             style={styles.masterBalanceText}
@@ -113,7 +158,7 @@ export default function HomeScreen() {
                 <MaterialIcons name="arrow-downward" size={16} color="#047857" />
               </View>
               <View>
-                <Text style={styles.cashflowLabel}>Pemasukan</Text>
+                <Text style={styles.cashflowLabel}>Pemasukan (Gaji)</Text>
                 <CurrencyText amount={totalIncome} type="income" style={styles.cashflowVal} />
               </View>
             </View>
@@ -132,17 +177,26 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* 2. Tombol Utama: Tambah Transaksi Baru */}
-        <TouchableOpacity
-          style={styles.mainAddButton}
-          activeOpacity={0.85}
-          onPress={() => router.push('/(tabs)/add')}
-        >
-          <View style={styles.mainAddIcon}>
-            <MaterialIcons name="add" size={22} color={SakuraTheme.colors.primary} />
-          </View>
-          <Text style={styles.mainAddText}>+ Catat Transaksi Baru</Text>
-        </TouchableOpacity>
+        {/* 2. Dua Tombol Utama Berdampingan: Catat Pengeluaran & Tambah Saldo (Gajian) */}
+        <View style={styles.mainActionsRow}>
+          <TouchableOpacity
+            style={styles.expenseActionBtn}
+            activeOpacity={0.85}
+            onPress={() => router.push('/(tabs)/add')}
+          >
+            <MaterialIcons name="remove-circle-outline" size={20} color="#ffffff" />
+            <Text style={styles.actionBtnText}>- Catat Pengeluaran</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.incomeActionBtn}
+            activeOpacity={0.85}
+            onPress={() => setShowDepositModal(true)}
+          >
+            <MaterialIcons name="add-circle-outline" size={20} color="#ffffff" />
+            <Text style={styles.actionBtnText}>+ Tambah Saldo (Gajian)</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* 3. Pintasan Catat Cepat (1-Tap Langsung Potong Saldo) */}
         <View style={styles.sectionHeader}>
@@ -263,7 +317,7 @@ export default function HomeScreen() {
                         onPress={() => {
                           Alert.alert(
                             'Hapus Transaksi',
-                            `Hapus catatan ${tx.note}? Saldo akan otomatis dikembalikan.`,
+                            `Hapus catatan ${tx.note}? Saldo akan otomatis disesuaikan kembali.`,
                             [
                               { text: 'Batal', style: 'cancel' },
                               {
@@ -288,6 +342,104 @@ export default function HomeScreen() {
 
         <View style={{ height: 30 }} />
       </ScrollView>
+
+      {/* Modal Tambah Saldo / Gajian */}
+      <Modal visible={showDepositModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <View style={styles.modalIconWrap}>
+                <MaterialIcons name="account-balance-wallet" size={24} color="#047857" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Tambah Saldo (Gajian)</Text>
+                <Text style={styles.modalSub}>
+                  Masukkan dana masuk ke kantong pilihanmu
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowDepositModal(false)}>
+                <MaterialIcons name="close" size={24} color={SakuraTheme.colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Input Nominal */}
+            <Text style={styles.fieldLabel}>Nominal Masuk (Rp)</Text>
+            <View style={styles.amountInputRow}>
+              <Text style={styles.rpText}>Rp</Text>
+              <TextInput
+                style={styles.amountInput}
+                keyboardType="numeric"
+                value={depositAmountStr}
+                onChangeText={(t) => setDepositAmountStr(t.replace(/[^0-9]/g, ''))}
+                autoFocus
+              />
+            </View>
+
+            {/* Shortcut Gajian */}
+            <View style={styles.quickDepositChips}>
+              <TouchableOpacity
+                style={styles.depositChip}
+                onPress={() => handleQuickAddDeposit(1000000)}
+              >
+                <Text style={styles.depositChipText}>+1 Juta</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.depositChip}
+                onPress={() => handleQuickAddDeposit(2000000)}
+              >
+                <Text style={styles.depositChipText}>+2 Juta</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.depositChip}
+                onPress={() => handleQuickAddDeposit(5000000)}
+              >
+                <Text style={styles.depositChipText}>+5 Juta</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.depositChip, { backgroundColor: '#fee2e2' }]}
+                onPress={() => setDepositAmountStr('')}
+              >
+                <Text style={[styles.depositChipText, { color: '#ba1a1a' }]}>Hapus</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Pilih Kantong Tujuan */}
+            <Text style={styles.fieldLabel}>Pilih Rekening Tujuan Masuk</Text>
+            <View style={styles.pocketChoiceRow}>
+              {pockets.map((poc) => {
+                const isSelected = selectedDepositPocket === poc.id;
+                return (
+                  <TouchableOpacity
+                    key={poc.id}
+                    style={[styles.pocketChoiceBtn, isSelected && styles.pocketChoiceBtnActive]}
+                    onPress={() => setSelectedDepositPocket(poc.id)}
+                  >
+                    <Text style={[styles.pocketChoiceText, isSelected && styles.textWhite]}>
+                      {poc.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Keterangan */}
+            <Text style={styles.fieldLabel}>Keterangan Pemasukan</Text>
+            <TextInput
+              style={styles.textInputRegular}
+              placeholder="Contoh: Gaji Bulanan, Bonus, Transfer Masuk"
+              placeholderTextColor="#9f123960"
+              value={depositNote}
+              onChangeText={setDepositNote}
+            />
+
+            {/* Tombol Simpan */}
+            <TouchableOpacity style={styles.confirmDepositBtn} onPress={handleSaveDeposit}>
+              <MaterialIcons name="add-circle" size={20} color="#ffffff" />
+              <Text style={styles.confirmDepositText}>Tambah ke Saldo 💰</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -320,10 +472,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: SakuraTheme.colors.primary,
+    backgroundColor: '#047857',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: SakuraTheme.colors.primary,
+    shadowColor: '#047857',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -362,12 +514,32 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
   },
+  masterTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   masterLabel: {
     fontFamily: SakuraTheme.typography.fontFamily,
     fontSize: 12,
     color: '#ffd5dd',
     fontWeight: '500',
-    marginBottom: 4,
+  },
+  masterDepositChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#047857',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  masterDepositText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#ffffff',
   },
   masterBalanceText: {
     fontSize: 28,
@@ -415,32 +587,44 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     marginHorizontal: 10,
   },
-  mainAddButton: {
+  mainActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 18,
+  },
+  expenseActionBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 6,
     backgroundColor: SakuraTheme.colors.primary,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: SakuraTheme.borderRadius.lg,
-    marginBottom: 18,
     shadowColor: SakuraTheme.colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  mainAddIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
+  incomeActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#047857',
+    paddingVertical: 12,
+    borderRadius: SakuraTheme.borderRadius.lg,
+    shadowColor: '#047857',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  mainAddText: {
+  actionBtnText: {
     fontFamily: SakuraTheme.typography.fontFamily,
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: '700',
     color: '#ffffff',
   },
@@ -604,5 +788,157 @@ const styles = StyleSheet.create({
     color: SakuraTheme.colors.textMuted,
     textAlign: 'center',
     marginTop: 4,
+  },
+
+  // Modal styling
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: SakuraTheme.borderRadius.xl,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: SakuraTheme.colors.border,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  modalIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#ecfdf5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 17,
+    fontWeight: '800',
+    color: SakuraTheme.colors.textPrimary,
+  },
+  modalSub: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 12,
+    color: SakuraTheme.colors.textMuted,
+    marginTop: 2,
+  },
+  fieldLabel: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 12,
+    fontWeight: '700',
+    color: SakuraTheme.colors.textPrimary,
+    marginBottom: 6,
+    marginTop: 10,
+  },
+  amountInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: SakuraTheme.colors.cardSubtle,
+    borderWidth: 1.5,
+    borderColor: SakuraTheme.colors.border,
+    borderRadius: SakuraTheme.borderRadius.md,
+    paddingHorizontal: 12,
+  },
+  rpText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#047857',
+    marginRight: 6,
+  },
+  amountInput: {
+    flex: 1,
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 24,
+    fontWeight: '800',
+    color: SakuraTheme.colors.textPrimary,
+    paddingVertical: 10,
+  },
+  quickDepositChips: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 8,
+  },
+  depositChip: {
+    flex: 1,
+    backgroundColor: '#ecfdf5',
+    borderWidth: 1,
+    borderColor: '#a7f3d0',
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  depositChipText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#047857',
+  },
+  pocketChoiceRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  pocketChoiceBtn: {
+    flex: 1,
+    backgroundColor: SakuraTheme.colors.cardSubtle,
+    borderWidth: 1.5,
+    borderColor: SakuraTheme.colors.border,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  pocketChoiceBtnActive: {
+    backgroundColor: '#047857',
+    borderColor: '#047857',
+  },
+  pocketChoiceText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 12,
+    fontWeight: '700',
+    color: SakuraTheme.colors.textPrimary,
+  },
+  textWhite: {
+    color: '#ffffff',
+  },
+  textInputRegular: {
+    backgroundColor: SakuraTheme.colors.cardSubtle,
+    borderWidth: 1,
+    borderColor: SakuraTheme.colors.border,
+    borderRadius: 8,
+    padding: 10,
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 13,
+    color: SakuraTheme.colors.textPrimary,
+  },
+  confirmDepositBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#047857',
+    paddingVertical: 14,
+    borderRadius: SakuraTheme.borderRadius.lg,
+    marginTop: 18,
+    shadowColor: '#047857',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  confirmDepositText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#ffffff',
   },
 });
