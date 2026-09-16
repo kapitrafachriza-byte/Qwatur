@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "tertiary-container": "#a93577", "on-secondary": "#ffffff", "income-emerald": "#047857", "on-secondary-fixed-variant": "#8e0542", "tertiary-fixed": "#ffd8e7", "on-tertiary": "#ffffff", "berry-plum-deep": "#831843", "tertiary-fixed-dim": "#ffafd3", "text-primary": "#4c0519", "surface-container": "#f4ecee", "surface-variant": "#e8e1e3", "surface": "#fff7f9", "on-surface": "#1e1b1c", "surface-container-high": "#eee6e8", "sakura-mist": "#fdf2f4", "error-container": "#ffdad6", "on-error": "#ffffff", "inverse-on-surface": "#f7eff1", "primary-fixed-dim": "#ffb1c3", "primary": "#970046", "sakura-pink": "#ec4899", "surface-dim": "#dfd8da", "expense-bg": "#fff1f2", "on-primary-fixed": "#3f0019", "on-tertiary-fixed-variant": "#85145a", "income-bg": "#ecfdf5", "on-primary": "#ffffff", "outline-variant": "#e0bec4", "secondary-container": "#fe6696", "on-tertiary-fixed": "#3d0026", "secondary-fixed": "#ffd9e0", "on-primary-fixed-variant": "#8f0042", "surface-tint": "#b81059", "text-muted": "#9f1239", "sakura-petal": "#fce7f3", "background": "#fff7f9", "on-surface-variant": "#594046", "secondary": "#af275a", "on-secondary-fixed": "#3f0019", "surface-container-lowest": "#ffffff", "secondary-fixed-dim": "#ffb1c3", "tertiary": "#8a1a5e", "on-primary-container": "ffd5dd", "border-petal": "#fbcfe8", "on-error-container": "#93000a", "error": "#ba1a1a", "on-tertiary-container": "#ffd4e5", "inverse-surface": "#332f31", "on-background": "#1e1b1c", "surface-container-highest": "#e8e1e3", "inverse-primary": "#ffb1c3", "primary-container": "#be185d", "on-secondary-container": "#6a002f", "outline": "#8d7075", "surface-bright": "#fff7f9", "surface-container-low": "#f9f2f4", "primary-fixed": "#ffd9e0", "expense-rose": "#be185d" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "margin-tablet": "2rem", "space-xl": "2rem", "space-md": "1rem", "space-sm": "0.5rem", "margin": "1.25rem", "gutter-tablet": "1.5rem", "space-xs": "0.25rem", "gutter": "1rem", "space-lg": "1.5rem" }, fontFamily: { "headline-sm": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "label-currency-prefix": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "display-currency-mobile": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "display-currency": ["Plus Jakarta Sans"] }, fontSize: { "headline-sm": ["18px", { lineHeight: "24px", fontWeight: "600" }], "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }], "headline-lg": ["24px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "700" }], "label-currency-prefix": ["14px", { lineHeight: "20px", fontWeight: "600" }], "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }], "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }], "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }], "display-currency-mobile": ["26px", { lineHeight: "34px", letterSpacing: "-0.02em", fontWeight: "700" }], "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }], "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }], "label-sm": ["10px", { lineHeight: "12px", letterSpacing: "0.04em", fontWeight: "700" }], "display-currency": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(157,23,77,0.04)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Modern minimalist financial wallet or coin icon with subtle sakura flower petal motif for qwatur personal finance app, rose plum and soft sakura pink theme, clean vector SVG. Brand logo. - Primary color: #be185d
+- Font: plusJakartaSans
+- Mode: light
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WCSPiN2zhKonQ4pJNdxNsd4zznieu7IIuNFGhS9XUgn758cssPZcoo3t_jI1OfI2mZzdtP24sFsWbPbVE5j4p-w8EfbctWzQBgaRwxh6x65ZFC0G9690nRDoAy3mObDFZ7bwnaF4uoF_R5laN-MNT_JlbDMFqGedejnJcD8FmR3BLDxwYnrcKVT80nWUBWgjPpBf4UzXY8ym2OLGC7rmoVauaGO9BYYbbA3BK-k_ECAs-RSTGY5wtKRg"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-text-primary leading-tight tracking-tight">qwatur</span><span class="font-label-sm text-label-sm text-text-muted capitalize">Profil</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Notifikasi" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-sakura-petal/60 transition-colors focus:outline-none" type="button"><span class="material-symbols-outlined">notifications</span></button><a class="w-11 h-11 flex items-center justify-center rounded-full hover:opacity-90 transition-opacity" data-path="profil" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-border-petal" src="https://lh3.googleusercontent.com/aida/AEtjO1VC0Ww-vjmMRqGsHIbjcVkxhCtthFy8urQZgAlTAo0_fV01x-2pOl6WG-w101_EtkRefeaCmC1TKvqDHA1qpWCOA7Y04k__2mh6Dzx1es1vQ_tsYt4a8DlL9kmAYXMxlYiKGcZhVayDlCySAFsjEImZC0GcXiZjo2cGahSsj2LG4A7SOKrU7Yn-zxMavzK8H1-_gkMqOnOV9_fqR2IzYETB1GKFGW-H8PCtW6VAdpT3c7dxxnFbW2IEjQ"/></a></div></div></header><main class="flex flex-col relative w-full pt-16 pb-24 bg-surface min-h-screen"><div class="flex flex-col w-full px-margin pb-space-xl gap-space-lg">
+<!-- User Profile Header Card -->
+<div class="relative bg-surface-container-lowest rounded-xl p-space-md shadow-[0_4px_20px_-2px_rgba(157,23,77,0.06)] overflow-hidden">
+<!-- Subtle Sakura Blossom Ambient Gradient Accent -->
+<div class="absolute -right-12 -top-12 w-36 h-36 bg-sakura-petal/60 rounded-full blur-2xl pointer-events-none"></div>
+<div class="relative flex items-start gap-space-md">
+<!-- Avatar with Verified Badge -->
+<div class="relative flex-shrink-0">
+<div class="w-16 h-16 rounded-full overflow-hidden bg-sakura-mist shadow-sm">
+<img alt="Sarah Pramudita Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VC0Ww-vjmMRqGsHIbjcVkxhCtthFy8urQZgAlTAo0_fV01x-2pOl6WG-w101_EtkRefeaCmC1TKvqDHA1qpWCOA7Y04k__2mh6Dzx1es1vQ_tsYt4a8DlL9kmAYXMxlYiKGcZhVayDlCySAFsjEImZC0GcXiZjo2cGahSsj2LG4A7SOKrU7Yn-zxMavzK8H1-_gkMqOnOV9_fqR2IzYETB1GKFGW-H8PCtW6VAdpT3c7dxxnFbW2IEjQ"/>
+</div>
+<div class="absolute -bottom-1 -right-1 w-6 h-6 bg-expense-rose text-on-primary rounded-full flex items-center justify-center shadow-[0_2px_6px_rgba(190,24,93,0.35)]">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<!-- User Info & Badges -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-space-xs">
+<h1 class="font-headline-sm text-headline-sm text-text-primary truncate">Sarah Pramudita</h1>
+<button aria-label="Edit Profil" class="w-8 h-8 rounded-full bg-sakura-mist text-text-muted flex items-center justify-center hover:bg-sakura-petal active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted truncate mt-0.5">sarah.p@example.com</p>
+<!-- Status Pill Badges -->
+<div class="flex flex-wrap items-center gap-space-xs mt-space-sm">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sakura-petal text-text-muted font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-expense-rose animate-pulse"></span>
+            Cloud Aktif
+          </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-expense-bg text-expense-rose font-label-sm text-label-sm">
+            Personal Pro
+          </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Stats Bar (3 Metric Tiles) -->
+<div class="grid grid-cols-3 gap-space-sm">
+<div class="bg-surface-container-lowest rounded-xl p-space-sm shadow-[0_4px_16px_-2px_rgba(157,23,77,0.04)] flex flex-col items-center text-center">
+<div class="w-8 h-8 rounded-full bg-sakura-mist text-expense-rose flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-[18px]">account_balance</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-text-primary">4</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Rekening</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-sm shadow-[0_4px_16px_-2px_rgba(157,23,77,0.04)] flex flex-col items-center text-center">
+<div class="w-8 h-8 rounded-full bg-sakura-mist text-expense-rose flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-[18px]">flag</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-text-primary">3</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Target Aktif</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-sm shadow-[0_4px_16px_-2px_rgba(157,23,77,0.04)] flex flex-col items-center text-center">
+<div class="w-8 h-8 rounded-full bg-sakura-mist text-income-emerald flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-[18px]">cloud_done</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-text-primary">09:30</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Backup Hari Ini</span>
+</div>
+</div>
+<!-- Section 1: Disiplin & Siklus Finansial -->
+<div class="flex flex-col gap-space-xs">
+<div class="px-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-text-muted tracking-wider uppercase">Disiplin &amp; Siklus Finansial</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_-2px_rgba(157,23,77,0.04)] overflow-hidden">
+<!-- Row 1: Mata Uang -->
+<a class="w-full flex items-center justify-between p-space-md hover:bg-sakura-mist/40 transition-colors" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Mata Uang &amp; Format</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Indonesian Rupiah</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0">
+<span class="px-2 py-0.5 rounded-full bg-sakura-mist text-text-muted font-label-sm text-label-sm">IDR (Rp)</span>
+<span class="material-symbols-outlined text-outline text-[20px]">chevron_right</span>
+</div>
+</a>
+<div class="h-[1px] bg-surface-container mx-space-md"></div>
+<!-- Row 2: Siklus Anggaran -->
+<a class="w-full flex items-center justify-between p-space-md hover:bg-sakura-mist/40 transition-colors" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">event_repeat</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Siklus Anggaran (Gajian)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Reset pos setiap tanggal gajian</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0">
+<span class="px-2 py-0.5 rounded-full bg-sakura-petal text-text-muted font-label-sm text-label-sm">Tgl 25 / bln</span>
+<span class="material-symbols-outlined text-outline text-[20px]">chevron_right</span>
+</div>
+</a>
+<div class="h-[1px] bg-surface-container mx-space-md"></div>
+<!-- Row 3: Batas Waspada Anggaran -->
+<div class="w-full flex items-center justify-between p-space-md">
+<div class="flex items-center gap-space-md min-w-0 pr-2">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">notification_important</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Batas Waspada Anggaran</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Peringatan limit menyentuh 80%</span>
+</div>
+</div>
+<button aria-checked="true" class="toggle-btn relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full bg-expense-rose p-0.5 transition-colors duration-200 ease-in-out focus:outline-none" role="switch" type="button">
+<span class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-on-primary shadow-md transition duration-200 ease-in-out"></span>
+</button>
+</div>
+<div class="h-[1px] bg-surface-container mx-space-md"></div>
+<!-- Row 4: Pengingat Catat Harian -->
+<div class="w-full flex items-center justify-between p-space-md">
+<div class="flex items-center gap-space-md min-w-0 pr-2">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">alarm</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Pengingat Catat Harian</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Setiap hari pukul 20:00 WIB</span>
+</div>
+</div>
+<button aria-checked="true" class="toggle-btn relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full bg-expense-rose p-0.5 transition-colors duration-200 ease-in-out focus:outline-none" role="switch" type="button">
+<span class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-on-primary shadow-md transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+</div>
+<!-- Section 2: Keamanan Finansial -->
+<div class="flex flex-col gap-space-xs">
+<div class="px-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-text-muted tracking-wider uppercase">Keamanan Finansial</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_-2px_rgba(157,23,77,0.04)] overflow-hidden">
+<!-- Row 1: Kunci Biometrik -->
+<div class="w-full flex items-center justify-between p-space-md">
+<div class="flex items-center gap-space-md min-w-0 pr-2">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">fingerprint</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Kunci Biometrik &amp; PIN</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Face ID / Sidik jari saat buka app</span>
+</div>
+</div>
+<button aria-checked="true" class="toggle-btn relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full bg-expense-rose p-0.5 transition-colors duration-200 ease-in-out focus:outline-none" role="switch" type="button">
+<span class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-on-primary shadow-md transition duration-200 ease-in-out"></span>
+</button>
+</div>
+<div class="h-[1px] bg-surface-container mx-space-md"></div>
+<!-- Row 2: Sensor Saldo Otomatis -->
+<div class="w-full flex items-center justify-between p-space-md">
+<div class="flex items-center gap-space-md min-w-0 pr-2">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Sensor Saldo Otomatis</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Sembunyikan angka di ruang publik</span>
+</div>
+</div>
+<button aria-checked="false" class="toggle-btn relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full bg-surface-container-highest p-0.5 transition-colors duration-200 ease-in-out focus:outline-none" role="switch" type="button">
+<span class="translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-on-primary shadow-md transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+</div>
+<!-- Section 3: Data & Laporan -->
+<div class="flex flex-col gap-space-xs">
+<div class="px-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-text-muted tracking-wider uppercase">Data &amp; Laporan</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_-2px_rgba(157,23,77,0.04)] overflow-hidden">
+<!-- Row 1: Ekspor Rekap -->
+<a class="w-full flex items-center justify-between p-space-md hover:bg-sakura-mist/40 transition-colors" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Ekspor Rekap Keuangan</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Unduh CSV, Excel spreadsheet, atau PDF</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] flex-shrink-0">chevron_right</span>
+</a>
+<div class="h-[1px] bg-surface-container mx-space-md"></div>
+<!-- Row 2: Cadangkan & Pulihkan -->
+<a class="w-full flex items-center justify-between p-space-md hover:bg-sakura-mist/40 transition-colors" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">cloud_sync</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Cadangkan &amp; Pulihkan</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Tersinkron dengan Google Drive</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0">
+<span class="px-2 py-0.5 rounded-full bg-income-bg text-income-emerald font-label-sm text-label-sm flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-income-emerald"></span>
+            Tersinkron
+          </span>
+<span class="material-symbols-outlined text-outline text-[20px]">chevron_right</span>
+</div>
+</a>
+</div>
+</div>
+<!-- Section 4: Aplikasi & Bantuan -->
+<div class="flex flex-col gap-space-xs">
+<div class="px-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-text-muted tracking-wider uppercase">Aplikasi &amp; Bantuan</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_-2px_rgba(157,23,77,0.04)] overflow-hidden">
+<!-- Row 1: Kategori Transaksi -->
+<a class="w-full flex items-center justify-between p-space-md hover:bg-sakura-mist/40 transition-colors" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">category</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Kategori Transaksi</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Sesuaikan pos belanja, icon, &amp; warna</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] flex-shrink-0">chevron_right</span>
+</a>
+<div class="h-[1px] bg-surface-container mx-space-md"></div>
+<!-- Row 2: Panduan & Bantuan -->
+<a class="w-full flex items-center justify-between p-space-md hover:bg-sakura-mist/40 transition-colors" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Panduan &amp; Bantuan Finansial</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">FAQ tips budgeting metode 50-30-20</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] flex-shrink-0">chevron_right</span>
+</a>
+<div class="h-[1px] bg-surface-container mx-space-md"></div>
+<!-- Row 3: Tentang qwatur -->
+<a class="w-full flex items-center justify-between p-space-md hover:bg-sakura-mist/40 transition-colors" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-lg bg-sakura-mist text-expense-rose flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">info</span>
+</div>
+<div class="flex flex-col text-left min-w-0">
+<span class="font-label-lg text-label-lg text-text-primary truncate">Tentang qwatur</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Versi rilis 1.2.0 (Build 204)</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] flex-shrink-0">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Logout Button & Footer Tagline -->
+<div class="flex flex-col items-center gap-space-md pt-space-xs">
+<button class="w-full h-12 rounded-lg bg-sakura-mist text-expense-rose font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-sakura-petal active:scale-[0.98] transition-all shadow-[0_2px_8px_rgba(157,23,77,0.04)]" type="button">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+      Keluar dari Akun
+    </button>
+<!-- App Tagline with Sakura Petal Motif -->
+<div class="flex items-center justify-center gap-1.5 text-center">
+<span class="material-symbols-outlined text-expense-rose text-[16px]" style="font-variation-settings: 'FILL' 1;">spa</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">qwatur • Keuangan tenang, masa depan lapang</p>
+</div>
+</div>
+</div>
+<script>
+  // Local micro-interaction for toggle switches
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const isChecked = btn.getAttribute('aria-checked') === 'true';
+      const thumb = btn.querySelector('span');
+      if (isChecked) {
+        btn.setAttribute('aria-checked', 'false');
+        btn.classList.remove('bg-expense-rose');
+        btn.classList.add('bg-surface-container-highest');
+        thumb.classList.remove('translate-x-5');
+        thumb.classList.add('translate-x-0');
+      } else {
+        btn.setAttribute('aria-checked', 'true');
+        btn.classList.remove('bg-surface-container-highest');
+        btn.classList.add('bg-expense-rose');
+        thumb.classList.remove('translate-x-0');
+        thumb.classList.add('translate-x-5');
+      }
+    });
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/85 backdrop-blur-xl shadow-[0_-4px_20px_-2px_rgba(157,23,77,0.08)]" data-active-classes="text-expense-rose"><div class="relative flex items-center justify-between h-16 px-space-sm max-w-lg mx-auto"><div class="flex items-center justify-around flex-1"><a class="flex flex-col items-center justify-center min-w-[56px] h-11 gap-0.5 text-on-surface-variant transition-colors" data-path="beranda" href="#"><span class="material-symbols-outlined">cottage</span><span class="font-label-sm text-label-sm">Beranda</span></a><a class="flex flex-col items-center justify-center min-w-[56px] h-11 gap-0.5 text-on-surface-variant transition-colors" data-path="analisis" href="#"><span class="material-symbols-outlined">bar_chart_4_bars</span><span class="font-label-sm text-label-sm">Analisis</span></a></div><div class="flex items-center justify-center px-space-xs"><a aria-label="Tambah Transaksi" class="w-14 h-14 -mt-6 rounded-full bg-expense-rose text-on-primary flex items-center justify-center shadow-[0_10px_24px_-2px_rgba(190,24,93,0.35)] active:scale-95 transition-transform focus:outline-none" data-path="tambah-transaksi" href="#"><span class="material-symbols-outlined text-[28px]">add</span></a></div><div class="flex items-center justify-around flex-1"><a class="flex flex-col items-center justify-center min-w-[56px] h-11 gap-0.5 text-on-surface-variant transition-colors" data-path="kantong" href="#"><span class="material-symbols-outlined">account_balance_wallet</span><span class="font-label-sm text-label-sm">Kantong</span></a><a aria-current="page" class="flex flex-col items-center justify-center min-w-[56px] h-11 gap-0.5 transition-colors text-expense-rose" data-path="profil" href="#"><span class="material-symbols-outlined">person</span><span class="font-label-sm text-label-sm">Profil</span></a></div></div></nav></body></html>
