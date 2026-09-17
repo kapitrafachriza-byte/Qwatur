@@ -13,6 +13,7 @@ import { SakuraTheme } from '@/constants/theme';
 import { useFinanceStore } from '@/stores/financeStore';
 import { CurrencyText } from '@/components/CurrencyText';
 import { SakuraCard } from '@/components/SakuraCard';
+import { formatRupiah } from '@/utils/format';
 
 type PeriodMode = 'day' | 'week' | 'month' | 'year';
 
@@ -123,6 +124,9 @@ export default function AnalyticsScreen() {
           <TouchableOpacity
             style={[styles.periodTab, period === 'day' && styles.periodTabActive]}
             onPress={() => setPeriod('day')}
+            accessibilityRole="button"
+            accessibilityLabel="Filter laporan per hari"
+            accessibilityState={{ selected: period === 'day' }}
           >
             <Text style={[styles.periodTabText, period === 'day' && styles.periodTabTextActive]}>
               Per Hari
@@ -132,6 +136,9 @@ export default function AnalyticsScreen() {
           <TouchableOpacity
             style={[styles.periodTab, period === 'week' && styles.periodTabActive]}
             onPress={() => setPeriod('week')}
+            accessibilityRole="button"
+            accessibilityLabel="Filter laporan per minggu"
+            accessibilityState={{ selected: period === 'week' }}
           >
             <Text style={[styles.periodTabText, period === 'week' && styles.periodTabTextActive]}>
               Per Minggu
@@ -141,6 +148,9 @@ export default function AnalyticsScreen() {
           <TouchableOpacity
             style={[styles.periodTab, period === 'month' && styles.periodTabActive]}
             onPress={() => setPeriod('month')}
+            accessibilityRole="button"
+            accessibilityLabel="Filter laporan per bulan"
+            accessibilityState={{ selected: period === 'month' }}
           >
             <Text style={[styles.periodTabText, period === 'month' && styles.periodTabTextActive]}>
               Per Bulan
@@ -150,6 +160,9 @@ export default function AnalyticsScreen() {
           <TouchableOpacity
             style={[styles.periodTab, period === 'year' && styles.periodTabActive]}
             onPress={() => setPeriod('year')}
+            accessibilityRole="button"
+            accessibilityLabel="Filter laporan per tahun"
+            accessibilityState={{ selected: period === 'year' }}
           >
             <Text style={[styles.periodTabText, period === 'year' && styles.periodTabTextActive]}>
               Per Tahun
@@ -309,6 +322,8 @@ export default function AnalyticsScreen() {
                           );
                         }}
                         style={styles.delBtn}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Hapus transaksi ${tx.note}, ${formatRupiah(tx.amount)} rupiah`}
                       >
                         <MaterialIcons name="close" size={16} color="#ba1a1a" />
                       </TouchableOpacity>

@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SakuraTheme } from '@/constants/theme';
 import { useFinanceStore } from '@/stores/financeStore';
+import { formatRupiah } from '@/utils/format';
 
 const MAX_AMOUNT = 999_999_999; // Rp 999.999.999
 
@@ -60,7 +61,7 @@ export default function AddTransactionTab() {
     if (type === 'expense' && selectedPoc && selectedPoc.balance < nominal) {
       Alert.alert(
         'Saldo Tidak Cukup',
-        `Saldo di ${selectedPoc.name} hanya Rp ${selectedPoc.balance.toLocaleString('id-ID')}. Tetap lanjutkan?`,
+        `Saldo di ${selectedPoc.name} hanya Rp ${formatRupiah(selectedPoc.balance)}. Tetap lanjutkan?`,
         [
           { text: 'Batal', style: 'cancel' },
           {
@@ -84,14 +85,19 @@ export default function AddTransactionTab() {
       note: note.trim(),
     });
 
-    Alert.alert('Berhasil Disimpan 🌸', `Transaksi Rp ${nominal.toLocaleString('id-ID')} berhasil dicatat dan saldo telah diperbarui!`, [
+    Alert.alert('Berhasil Disimpan 🌸', `Transaksi Rp ${formatRupiah(nominal)} berhasil dicatat dan saldo telah diperbarui!`, [
       {
         text: 'Lihat Beranda',
         onPress: () => router.navigate('/(tabs)'),
       },
     ]);
 
+    setAmountStr('');
     setNote('');
+    const firstCat = categories.find((c) => c.type === type);
+    if (firstCat) {
+      setSelectedCategory(firstCat.id);
+    }
   };
 
   const filteredCategories = categories.filter((c) => c.type === type);
@@ -116,6 +122,9 @@ export default function AddTransactionTab() {
                 const firstExp = categories.find((c) => c.type === 'expense');
                 if (firstExp) setSelectedCategory(firstExp.id);
               }}
+              accessibilityRole="button"
+              accessibilityLabel="Pilih jenis transaksi pengeluaran"
+              accessibilityState={{ selected: type === 'expense' }}
             >
               <MaterialIcons
                 name="arrow-upward"
@@ -134,6 +143,9 @@ export default function AddTransactionTab() {
                 const firstInc = categories.find((c) => c.type === 'income');
                 if (firstInc) setSelectedCategory(firstInc.id);
               }}
+              accessibilityRole="button"
+              accessibilityLabel="Pilih jenis transaksi pemasukan"
+              accessibilityState={{ selected: type === 'income' }}
             >
               <MaterialIcons
                 name="arrow-downward"
@@ -169,11 +181,18 @@ export default function AddTransactionTab() {
                   key={val}
                   style={styles.chip}
                   onPress={() => handleAddQuick(val)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Tambah nominal ${val / 1000} ribu rupiah`}
                 >
                   <Text style={styles.chipText}>+{val / 1000}rb</Text>
                 </TouchableOpacity>
               ))}
-              <TouchableOpacity style={styles.chipClear} onPress={handleClear}>
+              <TouchableOpacity
+                style={styles.chipClear}
+                onPress={handleClear}
+                accessibilityRole="button"
+                accessibilityLabel="Hapus nominal transaksi"
+              >
                 <Text style={styles.chipClearText}>Hapus</Text>
               </TouchableOpacity>
             </View>
@@ -192,6 +211,9 @@ export default function AddTransactionTab() {
                     key={poc.id}
                     style={[styles.pocketBtn, isSelected && styles.pocketBtnActive]}
                     onPress={() => setSelectedPocket(poc.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Pilih kantong ${poc.name}, saldo Rp ${formatRupiah(poc.balance)}`}
+                    accessibilityState={{ selected: isSelected }}
                   >
                     <MaterialIcons
                       name={poc.icon as any}
@@ -203,7 +225,7 @@ export default function AddTransactionTab() {
                         {poc.name}
                       </Text>
                       <Text style={[styles.pocketBtnBal, isSelected && { color: '#ffd5dd' }]}>
-                        Rp {poc.balance.toLocaleString('id-ID')}
+                        Rp {formatRupiah(poc.balance)}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -223,6 +245,9 @@ export default function AddTransactionTab() {
                     key={cat.id}
                     style={[styles.catItem, isSelected && styles.catItemActive]}
                     onPress={() => setSelectedCategory(cat.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Pilih kategori ${cat.name}`}
+                    accessibilityState={{ selected: isSelected }}
                   >
                     <View
                       style={[
@@ -261,7 +286,13 @@ export default function AddTransactionTab() {
           </View>
 
           {/* Tombol Simpan */}
-          <TouchableOpacity style={styles.saveButton} activeOpacity={0.85} onPress={handleSave}>
+          <TouchableOpacity
+            style={styles.saveButton}
+            activeOpacity={0.85}
+            onPress={handleSave}
+            accessibilityRole="button"
+            accessibilityLabel="Simpan Transaksi"
+          >
             <MaterialIcons name="check" size={22} color="#ffffff" />
             <Text style={styles.saveButtonText}>Simpan Transaksi 🌸</Text>
           </TouchableOpacity>
@@ -442,7 +473,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   catItem: {
-    width: '31%',
+    flexBasis: '30%',
+    flexGrow: 1,
+    maxWidth: '32%',
     backgroundColor: SakuraTheme.colors.card,
     borderWidth: 1.5,
     borderColor: SakuraTheme.colors.border,

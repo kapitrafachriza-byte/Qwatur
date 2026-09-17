@@ -15,6 +15,7 @@ import { SakuraTheme } from '@/constants/theme';
 import { useFinanceStore } from '@/stores/financeStore';
 import { CurrencyText } from '@/components/CurrencyText';
 import { SakuraCard } from '@/components/SakuraCard';
+import { formatRupiah } from '@/utils/format';
 
 const MAX_AMOUNT = 999_999_999; // Rp 999.999.999
 
@@ -30,7 +31,7 @@ export default function WalletsScreen() {
 
   // Modal Tambah Saldo / Gajian per Kantong
   const [depositPocketId, setDepositPocketId] = useState<string | null>(null);
-  const [depositAmountStr, setDepositAmountStr] = useState('3000000');
+  const [depositAmountStr, setDepositAmountStr] = useState('');
   const [depositNote, setDepositNote] = useState('Gaji Bulanan');
 
   // Modal Buat Kantong Baru
@@ -45,8 +46,14 @@ export default function WalletsScreen() {
 
   const handleOpenDeposit = (id: string) => {
     setDepositPocketId(id);
-    setDepositAmountStr('3000000');
+    setDepositAmountStr('');
     setDepositNote('Gaji Bulanan');
+  };
+
+  const handleQuickAddDeposit = (add: number) => {
+    const current = parseInt(depositAmountStr, 10) || 0;
+    const nextVal = Math.min(current + add, MAX_AMOUNT);
+    setDepositAmountStr(nextVal.toString());
   };
 
   const handleSaveDeposit = () => {
@@ -67,9 +74,10 @@ export default function WalletsScreen() {
     depositToPocket(depositPocketId, nominal, depositNote.trim() || 'Gaji Bulanan');
     const poc = pockets.find((p) => p.id === depositPocketId);
     setDepositPocketId(null);
+    setDepositAmountStr('');
     Alert.alert(
       'Saldo Bertambah! 💰',
-      `Saldo ${poc?.name} berhasil ditambah Rp ${nominal.toLocaleString('id-ID')}.`
+      `Saldo ${poc?.name} berhasil ditambah Rp ${formatRupiah(nominal)}.`
     );
   };
 
@@ -119,7 +127,12 @@ export default function WalletsScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.topHeader}>
         <Text style={styles.headerTitle}>Kantong & Dompet 🌸</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setShowAddModal(true)}>
+        <TouchableOpacity
+          style={styles.addBtn}
+          onPress={() => setShowAddModal(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Tambah kantong baru"
+        >
           <MaterialIcons name="add" size={20} color="#ffffff" />
           <Text style={styles.addBtnText}>Tambah</Text>
         </TouchableOpacity>
@@ -152,6 +165,8 @@ export default function WalletsScreen() {
                   <TouchableOpacity
                     style={styles.depositActionBtn}
                     onPress={() => handleOpenDeposit(poc.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Tambah saldo ke ${poc.name}`}
                   >
                     <MaterialIcons name="add-circle" size={16} color="#ffffff" />
                     <Text style={styles.depositActionText}>+ Tambah Saldo</Text>
@@ -160,6 +175,8 @@ export default function WalletsScreen() {
                   <TouchableOpacity
                     style={styles.editBtn}
                     onPress={() => handleOpenEdit(poc.id, poc.balance)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Sesuaikan saldo ${poc.name}`}
                   >
                     <Text style={styles.editBtnText}>Sesuaikan</Text>
                   </TouchableOpacity>
@@ -184,7 +201,11 @@ export default function WalletsScreen() {
                   Menambah saldo ke {currentDepositPocket?.name}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => setDepositPocketId(null)}>
+              <TouchableOpacity
+                onPress={() => setDepositPocketId(null)}
+                accessibilityRole="button"
+                accessibilityLabel="Tutup modal tambah saldo"
+              >
                 <MaterialIcons name="close" size={22} color={SakuraTheme.colors.textMuted} />
               </TouchableOpacity>
             </View>
@@ -197,6 +218,8 @@ export default function WalletsScreen() {
                 keyboardType="numeric"
                 value={depositAmountStr}
                 onChangeText={(t) => setDepositAmountStr(t.replace(/[^0-9]/g, ''))}
+                placeholder="0"
+                placeholderTextColor="#9f123950"
                 autoFocus
               />
             </View>
@@ -205,27 +228,35 @@ export default function WalletsScreen() {
             <View style={styles.chipRow}>
               <TouchableOpacity
                 style={styles.chip}
-                onPress={() => setDepositAmountStr('1000000')}
+                onPress={() => handleQuickAddDeposit(1000000)}
+                accessibilityRole="button"
+                accessibilityLabel="Tambah 1 juta rupiah"
               >
-                <Text style={styles.chipText}>1 Juta</Text>
+                <Text style={styles.chipText}>+1 Juta</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.chip}
-                onPress={() => setDepositAmountStr('3000000')}
+                onPress={() => handleQuickAddDeposit(2000000)}
+                accessibilityRole="button"
+                accessibilityLabel="Tambah 2 juta rupiah"
               >
-                <Text style={styles.chipText}>3 Juta</Text>
+                <Text style={styles.chipText}>+2 Juta</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.chip}
-                onPress={() => setDepositAmountStr('5000000')}
+                onPress={() => handleQuickAddDeposit(5000000)}
+                accessibilityRole="button"
+                accessibilityLabel="Tambah 5 juta rupiah"
               >
-                <Text style={styles.chipText}>5 Juta</Text>
+                <Text style={styles.chipText}>+5 Juta</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.chip}
-                onPress={() => setDepositAmountStr('10000000')}
+                style={[styles.chip, { backgroundColor: '#fee2e2' }]}
+                onPress={() => setDepositAmountStr('')}
+                accessibilityRole="button"
+                accessibilityLabel="Hapus nominal"
               >
-                <Text style={styles.chipText}>10 Juta</Text>
+                <Text style={[styles.chipText, { color: '#ba1a1a' }]}>Hapus</Text>
               </TouchableOpacity>
             </View>
 
@@ -242,10 +273,17 @@ export default function WalletsScreen() {
               <TouchableOpacity
                 style={styles.modalCancelBtn}
                 onPress={() => setDepositPocketId(null)}
+                accessibilityRole="button"
+                accessibilityLabel="Batal tambah saldo"
               >
                 <Text style={styles.modalCancelText}>Batal</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalDepositConfirmBtn} onPress={handleSaveDeposit}>
+              <TouchableOpacity
+                style={styles.modalDepositConfirmBtn}
+                onPress={handleSaveDeposit}
+                accessibilityRole="button"
+                accessibilityLabel="Tambah saldo"
+              >
                 <Text style={styles.modalDepositConfirmText}>Tambah Saldo 💰</Text>
               </TouchableOpacity>
             </View>
@@ -277,10 +315,17 @@ export default function WalletsScreen() {
               <TouchableOpacity
                 style={styles.modalCancelBtn}
                 onPress={() => setEditPocketId(null)}
+                accessibilityRole="button"
+                accessibilityLabel="Batal sesuaikan saldo"
               >
                 <Text style={styles.modalCancelText}>Batal</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalSaveBtn} onPress={handleSaveEdit}>
+              <TouchableOpacity
+                style={styles.modalSaveBtn}
+                onPress={handleSaveEdit}
+                accessibilityRole="button"
+                accessibilityLabel="Simpan penyesuaian saldo"
+              >
                 <Text style={styles.modalSaveText}>Simpan</Text>
               </TouchableOpacity>
             </View>
@@ -319,10 +364,17 @@ export default function WalletsScreen() {
               <TouchableOpacity
                 style={styles.modalCancelBtn}
                 onPress={() => setShowAddModal(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Batal tambah kantong"
               >
                 <Text style={styles.modalCancelText}>Batal</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalSaveBtn} onPress={handleCreatePocket}>
+              <TouchableOpacity
+                style={styles.modalSaveBtn}
+                onPress={handleCreatePocket}
+                accessibilityRole="button"
+                accessibilityLabel="Simpan kantong baru"
+              >
                 <Text style={styles.modalSaveText}>Tambah</Text>
               </TouchableOpacity>
             </View>

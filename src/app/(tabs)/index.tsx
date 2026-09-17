@@ -16,6 +16,7 @@ import { SakuraTheme } from '@/constants/theme';
 import { useFinanceStore } from '@/stores/financeStore';
 import { CurrencyText } from '@/components/CurrencyText';
 import { SakuraCard } from '@/components/SakuraCard';
+import { formatRupiah } from '@/utils/format';
 
 const MAX_AMOUNT = 999_999_999; // Rp 999.999.999
 
@@ -36,7 +37,7 @@ export default function HomeScreen() {
 
   // Modal Tambah Saldo / Gajian
   const [showDepositModal, setShowDepositModal] = useState(false);
-  const [depositAmountStr, setDepositAmountStr] = useState('5000000');
+  const [depositAmountStr, setDepositAmountStr] = useState('');
   const [selectedDepositPocket, setSelectedDepositPocket] = useState(pockets[0]?.id || 'poc-1');
   const [depositNote, setDepositNote] = useState('Gaji Bulanan');
 
@@ -62,6 +63,8 @@ export default function HomeScreen() {
     [transactions]
   );
 
+  const recentTransactions = useMemo(() => transactions.slice(0, 15), [transactions]);
+
   const handleQuickLog = (item: (typeof quickLogs)[0]) => {
     if (isQuickLogging) return;
     setIsQuickLogging(true);
@@ -70,7 +73,7 @@ export default function HomeScreen() {
     if (poc && poc.balance < item.amount) {
       Alert.alert(
         'Saldo Tidak Cukup',
-        `Saldo di ${poc.name} (Rp ${poc.balance.toLocaleString('id-ID')}) tidak cukup untuk ${item.title}.`
+        `Saldo di ${poc.name} (Rp ${formatRupiah(poc.balance)}) tidak cukup untuk ${item.title}.`
       );
       setTimeout(() => {
         setIsQuickLogging(false);
@@ -80,7 +83,7 @@ export default function HomeScreen() {
 
     const tx = executeQuickLog(item.id);
     if (tx) {
-      setLastLoggedNote(`Tercatat: ${item.title} (-Rp ${item.amount.toLocaleString('id-ID')})`);
+      setLastLoggedNote(`Tercatat: ${item.title} (-Rp ${formatRupiah(item.amount)})`);
       setTimeout(() => setLastLoggedNote(null), 3000);
     }
     setTimeout(() => {
@@ -110,8 +113,9 @@ export default function HomeScreen() {
 
     const targetPoc = pockets.find((p) => p.id === selectedDepositPocket);
     setShowDepositModal(false);
+    setDepositAmountStr('');
     setLastLoggedNote(
-      `Berhasil! Saldo ${targetPoc?.name || 'Kantong'} bertambah +Rp ${nominal.toLocaleString('id-ID')}`
+      `Berhasil! Saldo ${targetPoc?.name || 'Kantong'} bertambah +Rp ${formatRupiah(nominal)}`
     );
     setTimeout(() => setLastLoggedNote(null), 4000);
   };
@@ -136,6 +140,7 @@ export default function HomeScreen() {
         <TouchableOpacity
           style={styles.addIconBtn}
           onPress={() => setShowDepositModal(true)}
+          accessibilityRole="button"
           accessibilityLabel="Tambah Saldo Gajian"
         >
           <MaterialIcons name="add-card" size={22} color="#ffffff" />
@@ -158,6 +163,8 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.masterDepositChip}
               onPress={() => setShowDepositModal(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Tambah Saldo"
             >
               <MaterialIcons name="add" size={14} color="#ffffff" />
               <Text style={styles.masterDepositText}>Tambah Saldo</Text>
@@ -203,6 +210,8 @@ export default function HomeScreen() {
             style={styles.expenseActionBtn}
             activeOpacity={0.85}
             onPress={() => router.push('/(tabs)/add')}
+            accessibilityRole="button"
+            accessibilityLabel="Catat Pengeluaran"
           >
             <MaterialIcons name="remove-circle-outline" size={20} color="#ffffff" />
             <Text style={styles.actionBtnText}>- Catat Pengeluaran</Text>
@@ -212,6 +221,8 @@ export default function HomeScreen() {
             style={styles.incomeActionBtn}
             activeOpacity={0.85}
             onPress={() => setShowDepositModal(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Tambah Saldo Gajian"
           >
             <MaterialIcons name="add-circle-outline" size={20} color="#ffffff" />
             <Text style={styles.actionBtnText}>+ Tambah Saldo (Gajian)</Text>
@@ -235,6 +246,8 @@ export default function HomeScreen() {
               activeOpacity={0.7}
               disabled={isQuickLogging}
               onPress={() => handleQuickLog(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`Catat cepat ${item.title}, minus Rp ${formatRupiah(item.amount)}`}
             >
               <View style={styles.quickIconWrap}>
                 <MaterialIcons name={item.icon as any} size={22} color={SakuraTheme.colors.primary} />
@@ -243,7 +256,7 @@ export default function HomeScreen() {
                 {item.title}
               </Text>
               <Text style={styles.quickAmount}>
-                -Rp {item.amount.toLocaleString('id-ID')}
+                -Rp {formatRupiah(item.amount)}
               </Text>
               <View style={[styles.tapBadge, isQuickLogging && styles.tapBadgeDisabled]}>
                 <Text style={styles.tapBadgeText}>
@@ -260,7 +273,11 @@ export default function HomeScreen() {
             <MaterialIcons name="account-balance-wallet" size={20} color={SakuraTheme.colors.primary} />
             <Text style={styles.sectionTitle}>Kantong Saya</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/wallets')}>
+          <TouchableOpacity
+            onPress={() => router.push('/(tabs)/wallets')}
+            accessibilityRole="button"
+            accessibilityLabel="Kelola kantong saya"
+          >
             <Text style={styles.linkText}>Kelola ➔</Text>
           </TouchableOpacity>
         </View>
@@ -293,7 +310,7 @@ export default function HomeScreen() {
           </SakuraCard>
         ) : (
           <View style={styles.txList}>
-            {transactions.map((tx) => {
+            {recentTransactions.map((tx) => {
               const cat = getCategory(tx.categoryId);
               const poc = getPocket(tx.pocketId);
               const isExpense = tx.type === 'expense';
@@ -352,6 +369,8 @@ export default function HomeScreen() {
                           );
                         }}
                         style={styles.deleteBtn}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Hapus transaksi ${tx.note}`}
                       >
                         <MaterialIcons name="close" size={16} color="#ba1a1a" />
                       </TouchableOpacity>
@@ -360,6 +379,20 @@ export default function HomeScreen() {
                 </SakuraCard>
               );
             })}
+
+            {transactions.length > 15 && (
+              <TouchableOpacity
+                style={styles.viewAllTransactionsBtn}
+                activeOpacity={0.7}
+                onPress={() => router.push('/(tabs)/analytics')}
+                accessibilityRole="button"
+                accessibilityLabel={`Lihat semua ${transactions.length} transaksi di laporan`}
+              >
+                <Text style={styles.viewAllTransactionsText}>
+                  Lihat Semua Transaksi ({transactions.length}) di Laporan ➔
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
@@ -380,7 +413,11 @@ export default function HomeScreen() {
                   Masukkan dana masuk ke kantong pilihanmu
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => setShowDepositModal(false)}>
+              <TouchableOpacity
+                onPress={() => setShowDepositModal(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Tutup modal tambah saldo"
+              >
                 <MaterialIcons name="close" size={24} color={SakuraTheme.colors.textMuted} />
               </TouchableOpacity>
             </View>
@@ -394,6 +431,8 @@ export default function HomeScreen() {
                 keyboardType="numeric"
                 value={depositAmountStr}
                 onChangeText={(t) => setDepositAmountStr(t.replace(/[^0-9]/g, ''))}
+                placeholder="0"
+                placeholderTextColor="#9f123950"
                 autoFocus
               />
             </View>
@@ -403,24 +442,32 @@ export default function HomeScreen() {
               <TouchableOpacity
                 style={styles.depositChip}
                 onPress={() => handleQuickAddDeposit(1000000)}
+                accessibilityRole="button"
+                accessibilityLabel="Tambah 1 juta rupiah"
               >
                 <Text style={styles.depositChipText}>+1 Juta</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.depositChip}
                 onPress={() => handleQuickAddDeposit(2000000)}
+                accessibilityRole="button"
+                accessibilityLabel="Tambah 2 juta rupiah"
               >
                 <Text style={styles.depositChipText}>+2 Juta</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.depositChip}
                 onPress={() => handleQuickAddDeposit(5000000)}
+                accessibilityRole="button"
+                accessibilityLabel="Tambah 5 juta rupiah"
               >
                 <Text style={styles.depositChipText}>+5 Juta</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.depositChip, { backgroundColor: '#fee2e2' }]}
                 onPress={() => setDepositAmountStr('')}
+                accessibilityRole="button"
+                accessibilityLabel="Hapus nominal"
               >
                 <Text style={[styles.depositChipText, { color: '#ba1a1a' }]}>Hapus</Text>
               </TouchableOpacity>
@@ -436,6 +483,9 @@ export default function HomeScreen() {
                     key={poc.id}
                     style={[styles.pocketChoiceBtn, isSelected && styles.pocketChoiceBtnActive]}
                     onPress={() => setSelectedDepositPocket(poc.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Pilih rekening tujuan ${poc.name}`}
+                    accessibilityState={{ selected: isSelected }}
                   >
                     <Text style={[styles.pocketChoiceText, isSelected && styles.textWhite]}>
                       {poc.name}
@@ -456,7 +506,12 @@ export default function HomeScreen() {
             />
 
             {/* Tombol Simpan */}
-            <TouchableOpacity style={styles.confirmDepositBtn} onPress={handleSaveDeposit}>
+            <TouchableOpacity
+              style={styles.confirmDepositBtn}
+              onPress={handleSaveDeposit}
+              accessibilityRole="button"
+              accessibilityLabel="Tambah ke Saldo"
+            >
               <MaterialIcons name="add-circle" size={20} color="#ffffff" />
               <Text style={styles.confirmDepositText}>Tambah ke Saldo 💰</Text>
             </TouchableOpacity>
@@ -799,6 +854,23 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
     padding: 2,
+  },
+  viewAllTransactionsBtn: {
+    backgroundColor: SakuraTheme.colors.cardSubtle,
+    borderWidth: 1,
+    borderColor: SakuraTheme.colors.border,
+    borderRadius: SakuraTheme.borderRadius.md,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  viewAllTransactionsText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 13,
+    fontWeight: '700',
+    color: SakuraTheme.colors.primary,
   },
   emptyCard: {
     alignItems: 'center',

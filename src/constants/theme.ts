@@ -61,14 +61,27 @@ export const SakuraTheme = {
   },
   typography: {
     fontFamily: Platform.select({
-      ios: 'Plus Jakarta Sans',
-      android: 'Plus Jakarta Sans',
-      default: 'Plus Jakarta Sans, system-ui, sans-serif',
+      ios: 'System',
+      android: 'sans-serif',
+      default: 'system-ui, -apple-system, sans-serif',
     }),
   },
 };
 
-export const Colors = {
+export interface ThemeColorPalette {
+  text: string;
+  background: string;
+  tint: string;
+  tabIconDefault: string;
+  tabIconSelected: string;
+}
+
+export interface ThemeColors {
+  light: ThemeColorPalette;
+  dark: ThemeColorPalette;
+}
+
+export const Colors: ThemeColors = {
   light: {
     text: SakuraTheme.colors.textPrimary,
     background: SakuraTheme.colors.canvas,

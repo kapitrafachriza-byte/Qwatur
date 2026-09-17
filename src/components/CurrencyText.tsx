@@ -1,6 +1,9 @@
 import React from 'react';
 import { Text, StyleSheet, TextStyle } from 'react-native';
 import { SakuraTheme } from '@/constants/theme';
+import { formatRupiah } from '@/utils/format';
+
+export { formatRupiah };
 
 interface CurrencyTextProps {
   amount: number;
@@ -22,8 +25,7 @@ export const CurrencyText: React.FC<CurrencyTextProps> = ({
   if (type === 'expense') textColor = SakuraTheme.colors.expense;
 
   const sign = showSign ? (amount > 0 ? '+' : amount < 0 ? '-' : '') : '';
-  const absoluteAmount = Math.abs(amount);
-  const formatted = absoluteAmount.toLocaleString('id-ID');
+  const formatted = formatRupiah(amount);
 
   return (
     <Text style={[styles.text, { color: textColor }, style]}>
