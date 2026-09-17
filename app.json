@@ -8,9 +8,12 @@
     "scheme": "qwatur",
     "userInterfaceStyle": "light",
     "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kapitra.qwatur",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.kapitra.qwatur",
       "adaptiveIcon": {
         "backgroundColor": "#fff7f9",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -111,11 +112,43 @@ export default function AnalyticsScreen() {
     return `Tahun ${now.getFullYear()}`;
   };
 
+  const handleShareReport = async () => {
+    try {
+      const surplusDeficit = netSavings >= 0 ? 'Surplus (+)' : 'Defisit (-)';
+      const message =
+        `🌸 Ringkasan Keuangan Qwatur\n` +
+        `📅 Periode: ${getPeriodLabel()}\n` +
+        `--------------------------------\n` +
+        `📥 Pemasukan: Rp ${formatRupiah(periodIncome)}\n` +
+        `📤 Pengeluaran: Rp ${formatRupiah(periodExpense)}\n` +
+        `💰 Sisa Bersih: Rp ${formatRupiah(netSavings)} (${surplusDeficit})\n` +
+        `📝 Jumlah Transaksi: ${filteredTransactions.length}\n` +
+        `--------------------------------\n` +
+        `Dicatat dengan Qwatur 🌸`;
+
+      await Share.share({
+        message,
+        title: `Laporan Keuangan Qwatur - ${getPeriodLabel()}`,
+      });
+    } catch {
+      Alert.alert('Perhatian', 'Gagal membagikan laporan keuangan.');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       {/* Header */}
       <View style={styles.topHeader}>
         <Text style={styles.headerTitle}>Laporan Keuangan 🌸</Text>
+        <TouchableOpacity
+          style={styles.shareHeaderBtn}
+          onPress={handleShareReport}
+          accessibilityRole="button"
+          accessibilityLabel="Bagikan ringkasan laporan keuangan"
+        >
+          <MaterialIcons name="share" size={16} color="#ffffff" />
+          <Text style={styles.shareHeaderBtnText}>Bagikan</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -347,6 +380,9 @@ const styles = StyleSheet.create({
     backgroundColor: SakuraTheme.colors.canvas,
   },
   topHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: SakuraTheme.colors.card,
@@ -358,6 +394,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
     color: SakuraTheme.colors.textPrimary,
+  },
+  shareHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: SakuraTheme.colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: SakuraTheme.borderRadius.full,
+    shadowColor: SakuraTheme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  shareHeaderBtnText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#ffffff',
   },
   scrollContent: {
     padding: 16,

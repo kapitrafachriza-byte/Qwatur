@@ -24,10 +24,18 @@ export default function WalletsScreen() {
   const updatePocketBalance = useFinanceStore((state) => state.updatePocketBalance);
   const depositToPocket = useFinanceStore((state) => state.depositToPocket);
   const addPocket = useFinanceStore((state) => state.addPocket);
+  const editPocket = useFinanceStore((state) => state.editPocket);
+  const deletePocket = useFinanceStore((state) => state.deletePocket);
+  const resetAllData = useFinanceStore((state) => state.resetAllData);
+  const clearTransactions = useFinanceStore((state) => state.clearTransactions);
 
   // Modal Ubah Saldo Manual
   const [editPocketId, setEditPocketId] = useState<string | null>(null);
   const [editBalanceStr, setEditBalanceStr] = useState('');
+
+  // Modal Ubah Nama Kantong
+  const [renamePocketId, setRenamePocketId] = useState<string | null>(null);
+  const [renamePocketName, setRenamePocketName] = useState('');
 
   // Modal Tambah Saldo / Gajian per Kantong
   const [depositPocketId, setDepositPocketId] = useState<string | null>(null);
@@ -121,6 +129,84 @@ export default function WalletsScreen() {
     Alert.alert('Sukses', 'Kantong baru berhasil ditambahkan!');
   };
 
+  const handleOpenRename = (id: string, currentName: string) => {
+    setRenamePocketId(id);
+    setRenamePocketName(currentName);
+  };
+
+  const handleSaveRename = () => {
+    if (!renamePocketId) return;
+    const trimmed = renamePocketName.trim();
+    if (!trimmed) {
+      Alert.alert('Perhatian', 'Nama kantong tidak boleh kosong.');
+      return;
+    }
+    editPocket(renamePocketId, trimmed);
+    setRenamePocketId(null);
+    Alert.alert('Sukses', 'Nama kantong berhasil diperbarui!');
+  };
+
+  const handleDeletePocket = (id: string, name: string) => {
+    if (pockets.length <= 1) {
+      Alert.alert('Tidak Bisa Dihapus', 'Aplikasi membutuhkan minimal 1 kantong aktif.');
+      return;
+    }
+
+    Alert.alert(
+      'Hapus Kantong',
+      `Yakin ingin menghapus ${name}? Transaksi yang terkait akan tetap tersimpan di riwayat.`,
+      [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Hapus',
+          style: 'destructive',
+          onPress: () => {
+            const success = deletePocket(id);
+            if (success) {
+              Alert.alert('Sukses', `Kantong ${name} berhasil dihapus.`);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleResetData = () => {
+    Alert.alert(
+      'Mulai dari Nol 🌸',
+      'Yakin ingin mengosongkan semua riwayat transaksi dan mereset saldo semua kantong menjadi Rp 0? Ini cocok untuk mulai mencatat keuangan pribadimu dari awal.',
+      [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Reset ke Nol',
+          style: 'destructive',
+          onPress: () => {
+            resetAllData();
+            Alert.alert('Berhasil', 'Seluruh data telah di-reset ke nol. Selamat mencatat!');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleClearTxOnly = () => {
+    Alert.alert(
+      'Hapus Riwayat Transaksi',
+      'Yakin ingin menghapus seluruh catatan transaksi? Saldo kantong saat ini akan tetap dipertahankan.',
+      [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Hapus Riwayat',
+          style: 'destructive',
+          onPress: () => {
+            clearTransactions();
+            Alert.alert('Berhasil', 'Semua riwayat transaksi telah dikosongkan.');
+          },
+        },
+      ]
+    );
+  };
+
   const currentDepositPocket = pockets.find((p) => p.id === depositPocketId);
 
   return (
@@ -182,12 +268,108 @@ export default function WalletsScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
+
+              <View style={styles.pocketFooterDivider} />
+
+              <View style={styles.pocketFooterRow}>
+                <TouchableOpacity
+                  style={styles.pocketSubBtn}
+                  onPress={() => handleOpenRename(poc.id, poc.name)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ubah nama ${poc.name}`}
+                >
+                  <MaterialIcons name="edit" size={13} color={SakuraTheme.colors.textSecondary} />
+                  <Text style={styles.pocketSubBtnText}>Ubah Nama</Text>
+                </TouchableOpacity>
+
+                {pockets.length > 1 && (
+                  <TouchableOpacity
+                    style={styles.pocketSubBtn}
+                    onPress={() => handleDeletePocket(poc.id, poc.name)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Hapus ${poc.name}`}
+                  >
+                    <MaterialIcons name="delete-outline" size={14} color="#ba1a1a" />
+                    <Text style={[styles.pocketSubBtnText, { color: '#ba1a1a' }]}>Hapus</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </SakuraCard>
           ))}
         </View>
 
+        {/* Kelola Data & Reset */}
+        <View style={styles.dataMgmtSection}>
+          <Text style={styles.sectionTitle}>Kelola Data & Reset</Text>
+          <SakuraCard style={styles.dataMgmtCard}>
+            <Text style={styles.dataMgmtDesc}>
+              Siap mencatat keuangan riil pribadimu? Kamu bisa mengosongkan riwayat contoh atau memulai seluruh data dari Rp 0 kapan saja.
+            </Text>
+
+            <View style={styles.dataMgmtBtnsRow}>
+              <TouchableOpacity
+                style={styles.clearTxBtn}
+                onPress={handleClearTxOnly}
+                accessibilityRole="button"
+                accessibilityLabel="Hapus semua riwayat transaksi"
+              >
+                <MaterialIcons name="history" size={16} color={SakuraTheme.colors.primary} />
+                <Text style={styles.clearTxBtnText}>Kosongkan Riwayat</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.resetAllBtn}
+                onPress={handleResetData}
+                accessibilityRole="button"
+                accessibilityLabel="Mulai dari nol dan reset saldo"
+              >
+                <MaterialIcons name="restart-alt" size={16} color="#ba1a1a" />
+                <Text style={styles.resetAllBtnText}>Mulai dari Nol</Text>
+              </TouchableOpacity>
+            </View>
+          </SakuraCard>
+        </View>
+
         <View style={{ height: 30 }} />
       </ScrollView>
+
+      {/* Modal Ubah Nama Kantong */}
+      <Modal visible={!!renamePocketId} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Ubah Nama Kantong</Text>
+            <Text style={styles.modalSub}>Masukkan nama baru untuk kantong ini:</Text>
+
+            <TextInput
+              style={[styles.textInputRegular, { marginTop: 12 }]}
+              value={renamePocketName}
+              onChangeText={setRenamePocketName}
+              placeholder="Contoh: SeaBank, Tabungan Darurat"
+              placeholderTextColor="#9f123960"
+              autoFocus
+            />
+
+            <View style={styles.modalBtnRow}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setRenamePocketId(null)}
+                accessibilityRole="button"
+                accessibilityLabel="Batal ubah nama"
+              >
+                <Text style={styles.modalCancelText}>Batal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalSaveBtn}
+                onPress={handleSaveRename}
+                accessibilityRole="button"
+                accessibilityLabel="Simpan nama baru"
+              >
+                <Text style={styles.modalSaveText}>Simpan</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Modal Tambah Saldo / Gajian per Kantong */}
       <Modal visible={!!depositPocketId} transparent animationType="fade">
@@ -515,6 +697,87 @@ const styles = StyleSheet.create({
     fontFamily: SakuraTheme.typography.fontFamily,
     fontSize: 11,
     color: SakuraTheme.colors.textMuted,
+  },
+  pocketFooterDivider: {
+    height: 1,
+    backgroundColor: SakuraTheme.colors.border,
+    marginVertical: 8,
+    opacity: 0.6,
+  },
+  pocketFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 14,
+    paddingTop: 2,
+  },
+  pocketSubBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+  },
+  pocketSubBtnText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 11,
+    fontWeight: '600',
+    color: SakuraTheme.colors.textSecondary,
+  },
+  dataMgmtSection: {
+    marginTop: 24,
+  },
+  dataMgmtCard: {
+    padding: 16,
+    borderWidth: 1,
+    borderColor: SakuraTheme.colors.border,
+    backgroundColor: SakuraTheme.colors.card,
+  },
+  dataMgmtDesc: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 12,
+    color: SakuraTheme.colors.textSecondary,
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  dataMgmtBtnsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  clearTxBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: SakuraTheme.colors.cardSubtle,
+    borderWidth: 1,
+    borderColor: SakuraTheme.colors.border,
+    paddingVertical: 10,
+    borderRadius: SakuraTheme.borderRadius.md,
+  },
+  clearTxBtnText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 12,
+    fontWeight: '700',
+    color: SakuraTheme.colors.primary,
+  },
+  resetAllBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#fff1f2',
+    borderWidth: 1,
+    borderColor: '#fecdd3',
+    paddingVertical: 10,
+    borderRadius: SakuraTheme.borderRadius.md,
+  },
+  resetAllBtnText: {
+    fontFamily: SakuraTheme.typography.fontFamily,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#ba1a1a',
   },
   modalOverlay: {
     flex: 1,

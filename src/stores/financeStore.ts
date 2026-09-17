@@ -61,6 +61,10 @@ export interface FinanceState {
   ) => void;
   updatePocketBalance: (pocketId: string, newBalance: number) => void;
   addPocket: (name: string, initialBalance: number, icon?: string) => void;
+  editPocket: (pocketId: string, name: string) => void;
+  deletePocket: (pocketId: string) => boolean;
+  resetAllData: () => void;
+  clearTransactions: () => void;
 }
 
 export const generateId = (prefix: string): string => {
@@ -278,12 +282,57 @@ export const useFinanceStore = create<FinanceState>()(
         const safeBalance = Math.max(0, Number.isFinite(initialBalance) ? initialBalance : 0);
         const newPocket: Pocket = {
           id: generateId('poc'),
-          name,
+          name: name.trim() || 'Kantong Baru',
           balance: safeBalance,
           icon,
           color: '#be185d',
         };
         set((state) => ({ pockets: [...state.pockets, newPocket] }));
+      },
+
+      editPocket: (pocketId, name) => {
+        const trimmed = name.trim();
+        if (!trimmed) return;
+        set((state) => ({
+          pockets: state.pockets.map((p) =>
+            p.id === pocketId ? { ...p, name: trimmed } : p
+          ),
+        }));
+      },
+
+      deletePocket: (pocketId) => {
+        const currentPockets = get().pockets;
+        if (currentPockets.length <= 1) {
+          return false;
+        }
+
+        set((state) => {
+          const nextPockets = state.pockets.filter((p) => p.id !== pocketId);
+          const fallbackPocketId = nextPockets[0].id;
+
+          // Reassign quick logs that used this pocket
+          const nextQuickLogs = state.quickLogs.map((q) =>
+            q.pocketId === pocketId ? { ...q, pocketId: fallbackPocketId } : q
+          );
+
+          return {
+            pockets: nextPockets,
+            quickLogs: nextQuickLogs,
+          };
+        });
+
+        return true;
+      },
+
+      resetAllData: () => {
+        set((state) => ({
+          transactions: [],
+          pockets: state.pockets.map((p) => ({ ...p, balance: 0 })),
+        }));
+      },
+
+      clearTransactions: () => {
+        set({ transactions: [] });
       },
     }),
     {
